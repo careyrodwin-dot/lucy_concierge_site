@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucy Monthly Report</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #1B3A4B;
+            --navy-light: #2D4F5F;
+            --coral: #E8927C;
+            --white: #FFFFFF;
+            --gray-light: #94A3B8;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--navy);
+            color: var(--white);
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid var(--coral);
+        }
+        
+        .logo {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        
+        .report-period {
+            color: var(--gray-light);
+            font-size: 1rem;
+        }
+        
+        .filter-bar {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        select {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: var(--navy-light);
+            color: var(--white);
+            font-size: 0.9rem;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            background: var(--coral);
+            color: var(--white);
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .summary-banner {
+            background: linear-gradient(135deg, var(--coral) 0%, #d97c5e 100%);
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .summary-headline {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .summary-subtext {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .property-report {
+            background: var(--navy-light);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            page-break-inside: avoid;
+        }
+        
+        .property-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .property-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .property-month {
+            color: var(--gray-light);
+            font-size: 0.9rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-box {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--coral);
+            margin-bottom: 0.25rem;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--gray-light);
+        }
+        
+        .highlight-stat .stat-value {
+            color: var(--white);
+        }
+        
+        .highlight-stat {
+            background: var(--coral);
+        }
+        
+        .top-list {
+            margin-top: 1rem;
+        }
+        
+        .top-list h4 {
+            font-size: 0.85rem;
+            color: var(--gray-light);
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+        }
+        
+        .top-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .top-item {
+            background: rgba(255,255,255,0.1);
+            padding: 0.5rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+        
+        .top-item span {
+            color: var(--coral);
+            font-weight: 600;
+            margin-left: 0.25rem;
+        }
+        
+        .value-statement {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 12px;
+            padding: 1.25rem;
+            text-align: center;
+            margin-top: 1rem;
+        }
+        
+        .value-statement strong {
+            color: #22c55e;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 4rem;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.1);
+            border-top-color: var(--coral);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 4rem;
+            color: var(--gray-light);
+        }
+        
+        @media print {
+            body {
+                background: white;
+                color: #1a1a1a;
+            }
+            
+            .filter-bar, .btn {
+                display: none;
+            }
+            
+            .property-report {
+                background: #f5f5f5;
+                border: 1px solid #ddd;
+            }
+            
+            .stat-box {
+                border: 1px solid #ddd;
+            }
+            
+            .stat-value, .top-item span {
+                color: var(--coral);
+            }
+            
+            .summary-banner {
+                background: var(--coral);
+                color: white;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">🔔</div>
+            <h1>Lucy Concierge</h1>
+            <p class="report-period">Monthly Performance Report</p>
+        </header>
+        
+        <div class="filter-bar">
+            <select id="monthFilter">
+                <!-- Populated dynamically -->
+            </select>
+            <select id="propertyFilter">
+                <option value="all">All Properties</option>
+            </select>
+            <button class="btn" onclick="loadReport()">Generate Report</button>
+            <button class="btn" onclick="window.print()">🖨️ Print</button>
+        </div>
+        
+        <div id="report">
+            <div class="loading">
+                <div class="spinner"></div>
+                <p>Loading report data...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get property from URL parameter (e.g., ?property=hook-weim-sinker)
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlProperty = urlParams.get('property');
+        
+        // Populate month filter with last 12 months
+        const monthFilter = document.getElementById('monthFilter');
+        const today = new Date();
+        for (let i = 0; i < 12; i++) {
+            const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
+            const value = date.toISOString().substring(0, 7);
+            const label = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            monthFilter.innerHTML += `<option value="${value}">${label}</option>`;
+        }
+        
+        // If property specified in URL, pre-select it
+        if (urlProperty && urlProperty !== 'all') {
+            const select = document.getElementById('propertyFilter');
+            const option = document.createElement('option');
+            option.value = urlProperty;
+            option.textContent = urlProperty;
+            option.selected = true;
+            select.appendChild(option);
+        }
+        
+        async function loadReport() {
+            const report = document.getElementById('report');
+            report.innerHTML = `<div class="loading"><div class="spinner"></div><p>Loading report data...</p></div>`;
+            
+            const month = document.getElementById('monthFilter').value;
+            const property = document.getElementById('propertyFilter').value;
+            
+            // Calculate date range for selected month
+            const startDate = `${month}-01`;
+            const endDate = new Date(parseInt(month.split('-')[0]), parseInt(month.split('-')[1]), 0)
+                .toISOString().split('T')[0];
+            
+            try {
+                const params = new URLSearchParams({
+                    property_slug: property,
+                    start_date: startDate,
+                    end_date: endDate,
+                    report_type: 'monthly'
+                });
+                
+                const response = await fetch(`/.netlify/functions/get-analytics?${params}`);
+                const data = await response.json();
+                
+                if (!data.success) {
+                    throw new Error(data.error || 'Failed to load data');
+                }
+                
+                if (!data.monthly || data.monthly.length === 0) {
+                    report.innerHTML = `
+                        <div class="no-data">
+                            <h2>📊 No Data for This Period</h2>
+                            <p>No activity was recorded for the selected month.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                renderReport(data.monthly, month);
+                populatePropertyFilter(data.monthly);
+                
+            } catch (e) {
+                console.error('Report error:', e);
+                report.innerHTML = `
+                    <div class="no-data">
+                        <h2>⚠️ Error Loading Report</h2>
+                        <p>${e.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function renderReport(monthlyData, selectedMonth) {
+            const report = document.getElementById('report');
+            
+            // Calculate totals across all properties
+            const totals = monthlyData.reduce((acc, p) => {
+                acc.timeSaved += parseFloat(p.time_saved_hours) || 0;
+                acc.questions += p.questions_answered || 0;
+                acc.sessions += p.unique_sessions || 0;
+                acc.voiceCalls += p.voice_calls || 0;
+                return acc;
+            }, { timeSaved: 0, questions: 0, sessions: 0, voiceCalls: 0 });
+            
+            // Format month for display
+            const monthDate = new Date(selectedMonth + '-01');
+            const monthLabel = monthDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            
+            // Summary banner
+            let html = `
+                <div class="summary-banner">
+                    <div class="summary-headline">${totals.timeSaved.toFixed(1)} Hours Saved</div>
+                    <div class="summary-subtext">
+                        ${totals.questions} questions answered across ${monthlyData.length} ${monthlyData.length === 1 ? 'property' : 'properties'} in ${monthLabel}
+                    </div>
+                </div>
+            `;
+            
+            // Individual property reports
+            monthlyData.forEach(p => {
+                const topRecs = (p.top_recommendations || []).slice(0, 5).map(([name, count]) => 
+                    `<span class="top-item">${name} <span>${count}</span></span>`
+                ).join('');
+                
+                // Calculate value ($15/call deflected to PM)
+                const valueCreated = ((p.voice_calls || 0) + (p.card_clicks || 0)) * 15;
+                
+                html += `
+                    <div class="property-report">
+                        <div class="property-header">
+                            <span class="property-name">🏠 ${p.property_slug}</span>
+                            <span class="property-month">${monthLabel}</span>
+                        </div>
+                        
+                        <div class="stats-grid">
+                            <div class="stat-box highlight-stat">
+                                <div class="stat-value">${p.time_saved_hours || 0}</div>
+                                <div class="stat-label">Hours Saved</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value">${p.questions_answered || 0}</div>
+                                <div class="stat-label">Questions Answered</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value">${p.voice_calls || 0}</div>
+                                <div class="stat-label">Voice Calls</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value">${p.unique_sessions || 0}</div>
+                                <div class="stat-label">Guest Sessions</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value">${p.app_opens || 0}</div>
+                                <div class="stat-label">App Opens</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value">${p.card_clicks || 0}</div>
+                                <div class="stat-label">Recommendations</div>
+                            </div>
+                        </div>
+                        
+                        ${topRecs ? `
+                        <div class="top-list">
+                            <h4>🏆 Most Recommended</h4>
+                            <div class="top-items">${topRecs}</div>
+                        </div>
+                        ` : ''}
+                        
+                        <div class="value-statement">
+                            <strong>Estimated Value Created: $${valueCreated}</strong>
+                            <br><small>Based on ${p.voice_calls || 0} voice calls + ${p.card_clicks || 0} recommendations @ $15 per guest inquiry handled</small>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            report.innerHTML = html;
+        }
+        
+        function populatePropertyFilter(monthlyData) {
+            const select = document.getElementById('propertyFilter');
+            const currentValue = select.value;
+            const properties = [...new Set(monthlyData.map(p => p.property_slug))];
+            
+            select.innerHTML = '<option value="all">All Properties</option>' +
+                properties.map(p => `<option value="${p}" ${p === currentValue ? 'selected' : ''}>${p}</option>`).join('');
+        }
+        
+        // Load report on page load
+        loadReport();
+    </script>
+</body>
+</html>
