@@ -1,0 +1,2897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading... | Lucy Concierge</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #1e3a5f;
+            --navy-dark: #152a45;
+            --navy-light: #243f5f;
+            --coral: #e07a5f;
+            --coral-light: #e89680;
+            --white: #ffffff;
+            --gray: #8b9bab;
+            --gray-light: #a0aab4;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--navy-dark);
+            color: var(--white);
+            min-height: 100vh;
+            padding-bottom: 100px;
+        }
+
+        /* Loading */
+        .loading-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            gap: 1rem;
+        }
+        .loading-screen.hidden { display: none; }
+        .loading-spinner {
+            width: 40px; height: 40px;
+            border: 3px solid rgba(255,255,255,0.2);
+            border-top-color: var(--coral);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .main-content { display: none; }
+        .main-content.loaded { display: block; }
+
+        /* Header */
+        .header { text-align: center; padding: 2rem 1.25rem 0; }
+        .header-welcome { font-size: 1rem; color: var(--gray-light); margin-bottom: 0.25rem; }
+        .header-property { font-family: 'Playfair Display', serif; font-size: 1.75rem; font-weight: 600; margin-bottom: 0; }
+
+        /* Lucy Section */
+        .lucy-section { text-align: center; padding: 0.3rem 1.25rem 0.2rem; }
+        .lucy-logo { width: 140px; height: auto; margin: 0 auto 0.3rem auto; display: block; }
+        .logo-fallback { font-size: 1.5rem; font-weight: 600; color: var(--white); margin-bottom: 0.5rem; }
+        .lucy-card { background: var(--navy-light); border-radius: 16px; padding: 1.25rem; max-width: 300px; margin: 0 auto; }
+        .lucy-greeting { font-size: 1.05rem; font-weight: 500; margin-bottom: 0.2rem; }
+        .lucy-subtext { font-size: 0.85rem; color: var(--gray-light); margin-bottom: 0.85rem; }
+        .talk-btn {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            background: var(--white); color: var(--navy-dark);
+            padding: 0.7rem 1.25rem; border-radius: 8px; border: none;
+            font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600;
+            cursor: pointer; transition: transform 0.2s;
+            flex-wrap: wrap; justify-content: center;
+        }
+        .talk-btn:hover { transform: scale(1.02); }
+        .talk-btn-sub { width: 100%; font-size: 0.7rem; color: var(--gray); font-weight: 400; margin-top: 0.2rem; }
+        .lucy-tagline { font-size: 0.75rem; color: var(--gray); margin-top: 0.75rem; line-height: 1.4; }
+
+        /* Section Divider */
+        .section-divider {
+            display: flex; align-items: center; gap: 1rem;
+            padding: 0 1.25rem; margin: 0.5rem 0 0.85rem;
+        }
+        .section-divider::before, .section-divider::after {
+            content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.15);
+        }
+        .section-divider span {
+            font-size: 0.65rem; color: var(--gray);
+            text-transform: uppercase; letter-spacing: 1.5px; font-weight: 500;
+        }
+
+        /* Beach Tiles */
+        .beach-tiles { display: flex; justify-content: center; gap: 0.5rem; padding: 0 1.25rem 1.25rem; }
+        .beach-tile {
+            background: var(--navy-light); border-radius: 12px;
+            padding: 0.85rem 1rem; text-align: center;
+            flex: 1; max-width: 105px; text-decoration: none; color: inherit;
+        }
+        .beach-tile:hover { background: rgba(255,255,255,0.1); }
+        .beach-tile-icon { font-size: 1.35rem; margin-bottom: 0.3rem; }
+        .beach-tile-label { font-size: 0.55rem; color: var(--gray); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.1rem; }
+        .beach-tile-value { font-weight: 600; font-size: 0.9rem; }
+
+        /* Quick Access */
+        .quick-access { padding: 0 1.25rem 1rem; }
+
+        /* WiFi Tile */
+        .wifi-tile {
+            background: var(--navy-light); border-radius: 12px;
+            padding: 0.8rem 1rem; display: flex; align-items: center;
+            gap: 0.75rem; margin-bottom: 0.5rem;
+        }
+        .wifi-icon { font-size: 1.4rem; }
+        .wifi-details { flex: 1; }
+        .wifi-label { font-size: 0.55rem; color: var(--gray); text-transform: uppercase; letter-spacing: 0.5px; }
+        .wifi-network { font-weight: 600; font-size: 0.9rem; }
+        .wifi-password { font-size: 0.85rem; color: var(--coral); font-weight: 500; }
+        .copy-btn {
+            background: var(--coral); border: none; color: white;
+            padding: 0.4rem 0.7rem; border-radius: 6px;
+            font-size: 0.7rem; font-weight: 600; cursor: pointer;
+        }
+        .copy-btn:hover { background: var(--coral-light); }
+        .copy-btn.copied { background: #4CAF50; }
+
+        /* Info Grid */
+        .info-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; margin-bottom: 0.5rem; }
+        .info-tile {
+            background: var(--navy-light); border-radius: 12px;
+            padding: 0.75rem 0.4rem; text-align: center;
+            text-decoration: none; color: var(--white);
+            cursor: pointer; border: none; font-family: 'DM Sans', sans-serif;
+        }
+        .info-tile:hover { background: rgba(255,255,255,0.1); }
+        .info-tile-icon { font-size: 1.25rem; margin-bottom: 0.3rem; }
+        .info-tile-label { font-size: 0.5rem; color: var(--gray); text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 0.1rem; }
+        .info-tile-value { font-size: 0.65rem; font-weight: 500; line-height: 1.25; }
+        .info-tile-value.link { color: var(--coral); text-decoration: underline; }
+
+        /* Full Width Tile */
+        .full-tile {
+            background: var(--navy-light); border-radius: 12px;
+            padding: 0.85rem 1rem; display: flex; align-items: center;
+            justify-content: space-between; cursor: pointer; border: none;
+            width: 100%; font-family: 'DM Sans', sans-serif; color: var(--white); margin-bottom: 0.5rem;
+        }
+        .full-tile:hover { background: rgba(255,255,255,0.1); }
+        .full-tile-left { display: flex; align-items: center; gap: 0.75rem; }
+        .full-tile-icon { font-size: 1.3rem; }
+        .full-tile-text { font-size: 0.85rem; font-weight: 500; }
+        .full-tile-arrow { font-size: 1.1rem; color: var(--gray); }
+
+        /* PM Contact */
+        .pm-contact { text-align: center; padding: 0.5rem 0; font-size: 0.8rem; color: var(--gray-light); }
+        .pm-contact a { color: var(--coral); text-decoration: none; font-weight: 500; }
+
+        /* Local Guide */
+        .local-guide { padding: 0 1.25rem; }
+        .category-buttons { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.85rem; justify-content: center; }
+        .category-btn {
+            padding: 0.55rem 0.85rem; border-radius: 25px;
+            border: 1px solid rgba(255,255,255,0.2); background: transparent;
+            color: var(--white); font-family: 'DM Sans', sans-serif;
+            font-size: 0.75rem; font-weight: 500; cursor: pointer;
+            white-space: nowrap;
+        }
+        .category-btn:hover { border-color: var(--coral); background: rgba(224,122,95,0.1); }
+        .category-btn.active { background: var(--coral); border-color: var(--coral); }
+        .category-btn.hidden { display: none; }
+
+        /* Category Content */
+        .category-content { display: none; animation: fadeIn 0.3s ease; }
+        .category-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Beach Safety Info */
+        .beach-safety-info {
+            background: var(--navy-light); border-radius: 12px;
+            padding: 1rem; margin-bottom: 1rem;
+        }
+        .safety-header {
+            font-weight: 600; font-size: 1.1rem; margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .safety-section { margin-bottom: 0.85rem; }
+        .safety-section:last-child { margin-bottom: 0; }
+        .safety-title { font-weight: 600; font-size: 0.85rem; margin-bottom: 0.4rem; color: var(--coral); }
+        .safety-text { font-size: 0.8rem; color: var(--gray-light); line-height: 1.4; }
+        .safety-list { font-size: 0.8rem; color: var(--gray-light); line-height: 1.6; }
+        .safety-list div { margin-bottom: 0.2rem; }
+        .flag-grid { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.5rem; }
+        .flag-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; color: var(--gray-light); }
+        .flag-dot { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; }
+        .safety-link {
+            display: inline-block; font-size: 0.8rem; color: var(--coral);
+            text-decoration: none; font-weight: 500; margin-top: 0.25rem;
+        }
+        .safety-link:hover { text-decoration: underline; }
+        .safety-divider {
+            font-size: 0.7rem; color: var(--gray); text-transform: uppercase;
+            letter-spacing: 1px; margin-bottom: 0.75rem; font-weight: 500;
+        }
+        .beach-safety-btn {
+            display: flex; align-items: center; gap: 0.5rem;
+            width: 100%; padding: 0.85rem 1rem;
+            background: var(--navy-light); border: none; border-radius: 12px;
+            color: var(--white); font-family: 'DM Sans', sans-serif;
+            font-size: 0.9rem; font-weight: 600; cursor: pointer;
+            margin-bottom: 1rem; transition: background 0.2s;
+        }
+        .beach-safety-btn:hover { background: rgba(255,255,255,0.1); }
+        .beach-safety-arrow { margin-left: auto; color: var(--gray); font-size: 1.2rem; }
+
+        /* Subcategory Pills */
+        .subcategory-pills { 
+            display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.75rem; 
+            padding-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .subcategory-pill {
+            padding: 0.4rem 0.7rem; border-radius: 15px;
+            border: none; background: rgba(255,255,255,0.1);
+            color: var(--gray-light); font-family: 'DM Sans', sans-serif;
+            font-size: 0.7rem; font-weight: 500; cursor: pointer;
+            white-space: nowrap; transition: all 0.2s;
+        }
+        .subcategory-pill:hover { background: rgba(255,255,255,0.15); color: var(--white); }
+        .subcategory-pill.active { background: var(--white); color: var(--navy-dark); }
+        .subcategory-pill.small { padding: 0.3rem 0.5rem; font-size: 0.65rem; }
+        .fitness-subpills, .activity-subpills { border-bottom: none; padding-bottom: 0; }
+
+        /* Filter Toggles */
+        .filter-toggles {
+            display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.75rem;
+        }
+        .filter-toggle {
+            padding: 0.35rem 0.6rem; border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.2); background: transparent;
+            color: var(--gray-light); font-family: 'DM Sans', sans-serif;
+            font-size: 0.65rem; font-weight: 500; cursor: pointer;
+            white-space: nowrap; transition: all 0.2s;
+        }
+        .filter-toggle:hover { border-color: var(--coral); color: var(--coral); }
+        .filter-toggle.active { background: var(--coral); border-color: var(--coral); color: white; }
+
+        /* Live music header */
+        .live-music-header {
+            font-size: 0.9rem; font-weight: 600; color: var(--white);
+            padding: 0.5rem 0; margin-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Meal badges */
+        .meal-badges { display: flex; gap: 0.25rem; margin-left: auto; }
+        .meal-badge {
+            font-size: 0.5rem; padding: 0.1rem 0.3rem; border-radius: 3px;
+            background: rgba(255,255,255,0.15); color: var(--gray);
+            font-weight: 600;
+        }
+        .meal-badge.active { background: var(--coral); color: white; }
+
+        /* Cards */
+        .cards { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
+        .card {
+            display: flex; align-items: center; gap: 0.75rem;
+            background: var(--white); border-radius: 12px; padding: 0.6rem;
+            text-decoration: none;
+        }
+        .card:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
+        .card-image { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; background: var(--navy-light); }
+        .card-content { flex: 1; min-width: 0; }
+        .card-title { font-weight: 600; font-size: 0.85rem; color: var(--navy-dark); margin-bottom: 0.05rem; display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+        .card-subtitle { font-size: 0.7rem; color: var(--gray); }
+        .card-meta { font-size: 0.65rem; color: var(--coral); font-weight: 500; margin-top: 0.1rem; }
+        .card-arrow { color: var(--gray); font-size: 1.1rem; white-space: nowrap; font-size: 0.7rem; }
+        .card-icon-circle {
+            width: 50px; height: 50px; border-radius: 12px;
+            background: var(--navy-light); display: flex; align-items: center;
+            justify-content: center; font-size: 1.5rem; flex-shrink: 0;
+        }
+        .activity-card .card-arrow, .rental-card .card-arrow { 
+            color: var(--coral); font-size: 0.7rem; font-weight: 500; 
+        }
+        .cards-loading { text-align: center; padding: 1rem; color: var(--gray); font-size: 0.85rem; }
+        .access-badge { 
+            font-size: 0.55rem; padding: 0.15rem 0.4rem; border-radius: 4px; 
+            color: white; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .show-more-btn {
+            width: 100%; padding: 0.75rem; margin-top: 0.5rem;
+            background: transparent; border: 1px dashed rgba(255,255,255,0.3);
+            color: var(--gray-light); border-radius: 12px;
+            font-family: 'DM Sans', sans-serif; font-size: 0.8rem; font-weight: 500;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .show-more-btn:hover { border-color: var(--coral); color: var(--coral); }
+
+        /* Modal */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7); z-index: 200;
+            align-items: center; justify-content: center; padding: 1rem;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: var(--navy-light); border-radius: 16px; padding: 1.5rem;
+            max-width: 380px; width: 100%; max-height: 85vh; overflow-y: auto;
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .modal-title { font-family: 'Playfair Display', serif; font-size: 1.25rem; font-weight: 600; }
+        .modal-close { background: none; border: none; color: var(--gray); font-size: 1.5rem; cursor: pointer; }
+        .modal-section { margin-bottom: 1.25rem; }
+        .modal-section:last-child { margin-bottom: 0; }
+        .modal-section.hidden { display: none; }
+        .modal-section-title { font-size: 0.7rem; color: var(--coral); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; font-weight: 600; }
+        .modal-section-content { font-size: 0.85rem; line-height: 1.5; color: var(--gray-light); }
+        .modal-section-content strong { color: var(--white); }
+        .modal-section-content a { color: var(--coral); }
+        .modal-list { list-style: none; padding: 0; }
+        .modal-list li { padding: 0.35rem 0 0.35rem 1.25rem; position: relative; font-size: 0.8rem; color: var(--gray-light); }
+        .modal-list li::before { content: '✓'; position: absolute; left: 0; color: var(--coral); }
+        .emergency-number {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            background: rgba(239,68,68,0.2); padding: 0.5rem 1rem;
+            border-radius: 8px; margin: 0.5rem 0; font-weight: 600; color: #fca5a5;
+        }
+        .emergency-number a { color: #fca5a5; text-decoration: none; }
+        .emergency-contact-item { margin-bottom: 0.75rem; }
+        .emergency-contact-label { font-size: 0.85rem; font-weight: 600; color: var(--white); margin-bottom: 0.25rem; }
+
+        /* Floating Button */
+        .floating-lucy {
+            position: fixed; bottom: 1.25rem; left: 50%; transform: translateX(-50%);
+            display: flex; align-items: center; gap: 0.5rem;
+            background: linear-gradient(135deg, var(--coral) 0%, #c96a52 100%);
+            color: white; padding: 0.85rem 1.4rem; border-radius: 50px; border: none;
+            font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 600;
+            cursor: pointer; box-shadow: 0 4px 20px rgba(224,122,95,0.4); z-index: 100;
+        }
+        .floating-lucy:hover { transform: translateX(-50%) scale(1.05); }
+        .floating-lucy::after {
+            content: ''; position: absolute; width: 100%; height: 100%;
+            border-radius: 50px; background: var(--coral); z-index: -1;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0% { transform: scale(1); opacity: 0.4; } 100% { transform: scale(1.3); opacity: 0; } }
+
+        @media (min-width: 480px) { body { max-width: 420px; margin: 0 auto; } }
+    </style>
+</head>
+<body>
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-spinner"></div>
+        <div>Loading your guide...</div>
+    </div>
+
+    <div class="main-content" id="mainContent">
+        <header class="header">
+            <div class="header-welcome">Welcome to</div>
+            <h1 class="header-property" id="propertyName">Your Vacation Home</h1>
+        </header>
+
+        <section class="lucy-section">
+            <img id="propertyLogo" src="/lucy-concierge-logo.png" alt="Lucy Concierge" class="lucy-logo" onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='block';">
+            <div id="logo-fallback" class="logo-fallback" style="display:none;">🏖️ Lucy Concierge</div>
+            <div class="lucy-card">
+                <div class="lucy-greeting">How can I help?</div>
+                <div class="lucy-subtext">Ask me anything!</div>
+                <button type="button" class="talk-btn" onclick="talkToLucy()">
+                    <span>🎙️</span> Talk to Lucy
+                    <span class="talk-btn-sub">Tap to start</span>
+                </button>
+                <div class="lucy-tagline">Your 24/7 virtual assistant for all your stay needs</div>
+            </div>
+        </section>
+
+        <div class="section-divider"><span>Today at the Beach</span></div>
+        <div class="beach-tiles">
+            <a href="https://weather.com/weather/today/l/30.28,-86.00" target="_blank" class="beach-tile" onclick="sendBeaconEvent('quick_access', 'Weather', 'beach')">
+                <div class="beach-tile-icon" id="weatherIcon">☀️</div>
+                <div class="beach-tile-label">Weather</div>
+                <div class="beach-tile-value" id="weatherValue">--°</div>
+            </a>
+            <a href="https://www.swfd.org/beach-safety/" target="_blank" class="beach-tile" id="flagTile" onclick="sendBeaconEvent('quick_access', 'Beach Flags', 'beach')">
+                <div class="beach-tile-icon" id="flagIcon">🏳️</div>
+                <div class="beach-tile-label">Beach Flags</div>
+                <div class="beach-tile-value" id="flagValue" style="font-size:0.75rem;">Loading...</div>
+            </a>
+            <div class="beach-tile">
+                <div class="beach-tile-icon">🌅</div>
+                <div class="beach-tile-label">Sunset</div>
+                <div class="beach-tile-value" id="sunsetValue">--:--</div>
+            </div>
+        </div>
+
+        <div class="section-divider"><span>Quick Access Info</span></div>
+        <div class="quick-access">
+            <div class="wifi-tile">
+                <div class="wifi-icon">📶</div>
+                <div class="wifi-details">
+                    <div class="wifi-label">WiFi</div>
+                    <div class="wifi-network" id="wifiNetwork">Loading...</div>
+                    <div class="wifi-password" id="wifiPassword">Loading...</div>
+                </div>
+                <button class="copy-btn" onclick="copyPassword()">Copy</button>
+            </div>
+
+            <div class="info-grid">
+                <button class="info-tile" onclick="logEvent('quick_access', 'Door Code', 'property_info'); openModal('doorCodeModal')">
+                    <div class="info-tile-icon">🚪</div>
+                    <div class="info-tile-label">Door Code</div>
+                    <div class="info-tile-value" id="doorCode">Loading...</div>
+                </button>
+                <a class="info-tile" id="directionsLink" href="#" target="_blank">
+                    <div class="info-tile-icon">📍</div>
+                    <div class="info-tile-label">Getting Here</div>
+                    <div class="info-tile-value link">Directions</div>
+                </a>
+                <button class="info-tile" onclick="logEvent('quick_access', 'Check In/Out', 'property_info'); openModal('checkoutModal')">
+                    <div class="info-tile-icon">🕐</div>
+                    <div class="info-tile-label">Check In/Out</div>
+                    <div class="info-tile-value" id="checkTimes">Loading...</div>
+                </button>
+                <button class="info-tile" onclick="logEvent('quick_access', 'Emergency', 'property_info'); openModal('emergencyModal')">
+                    <div class="info-tile-icon">🚨</div>
+                    <div class="info-tile-label">Emergency</div>
+                    <div class="info-tile-value">Info</div>
+                </button>
+            </div>
+
+            <button class="full-tile" onclick="logEvent('quick_access', 'About Your Home', 'property_info'); openModal('propertyModal')">
+                <div class="full-tile-left">
+                    <div class="full-tile-icon">🏠</div>
+                    <div class="full-tile-text">About Your Home</div>
+                </div>
+                <div class="full-tile-arrow">›</div>
+            </button>
+
+            <div class="pm-contact">
+                Property Manager: <a href="#" id="pmPhoneLink">(---) --------</a>
+            </div>
+        </div>
+
+        <div class="section-divider"><span>Local Guide</span></div>
+        <div class="local-guide">
+            <div class="category-buttons">
+                <button class="category-btn" data-category="dining" onclick="toggleCategory('dining')">🍽️ Dining</button>
+                <button class="category-btn" data-category="beaches" onclick="toggleCategory('beaches')">🏖️ Beaches</button>
+                <button class="category-btn" data-category="activities" onclick="toggleCategory('activities')">🎯 Activities</button>
+                <button class="category-btn" data-category="rentals" onclick="toggleCategory('rentals')">🚲 Rentals</button>
+                <button class="category-btn" data-category="grocery" onclick="toggleCategory('grocery')">🛒 Grocery</button>
+                <button class="category-btn hidden" data-category="pets" id="petsBtn" onclick="toggleCategory('pets')">🐕 Pets</button>
+            </div>
+
+            <!-- Dining with filters -->
+            <div class="category-content" id="dining-content">
+                <div class="subcategory-pills" id="dining-cuisine-pills">
+                    <button class="subcategory-pill active" data-cuisine="all" onclick="filterDining('cuisine', 'all')">All</button>
+                    <button class="subcategory-pill" data-cuisine="Seafood" onclick="filterDining('cuisine', 'Seafood')">🦐 Seafood</button>
+                    <button class="subcategory-pill" data-cuisine="American" onclick="filterDining('cuisine', 'American')">🍔 American</button>
+                    <button class="subcategory-pill" data-cuisine="Mexican" onclick="filterDining('cuisine', 'Mexican')">🌮 Mexican</button>
+                    <button class="subcategory-pill" data-cuisine="Italian" onclick="filterDining('cuisine', 'Italian')">🍝 Italian</button>
+                    <button class="subcategory-pill" data-cuisine="Sushi" onclick="filterDining('cuisine', 'Sushi')">🍣 Sushi</button>
+                    <button class="subcategory-pill" data-cuisine="Asian" onclick="filterDining('cuisine', 'Asian')">🥡 Asian</button>
+                    <button class="subcategory-pill" data-cuisine="Southern" onclick="filterDining('cuisine', 'Southern')">🍗 Southern</button>
+                    <button class="subcategory-pill" data-cuisine="Spanish" onclick="filterDining('cuisine', 'Spanish')">🥘 Spanish</button>
+                    <button class="subcategory-pill" data-cuisine="Fine Dining" onclick="filterDining('cuisine', 'Fine Dining')">✨ Fine Dining</button>
+                    <button class="subcategory-pill" data-cuisine="Bar" onclick="filterDining('cuisine', 'Bar')">🍺 Bar</button>
+                    <button class="subcategory-pill" data-cuisine="Healthy" onclick="filterDining('cuisine', 'Healthy')">🥗 Healthy</button>
+                    <button class="subcategory-pill" data-cuisine="Desserts" onclick="filterDining('cuisine', 'Desserts')">🍨 Desserts</button>
+                    <button class="subcategory-pill" data-cuisine="Bakery" onclick="filterDining('cuisine', 'Bakery')">🥐 Bakery</button>
+                </div>
+                <div class="filter-toggles" id="dining-toggles">
+                    <button class="filter-toggle" data-filter="outdoor" onclick="toggleDiningFilter('outdoor')">🌴 Outdoor</button>
+                    <button class="filter-toggle" data-filter="pet" onclick="toggleDiningFilter('pet')">🐕 Pet Friendly</button>
+                    <button class="filter-toggle" data-filter="happy" onclick="toggleDiningFilter('happy')">🍹 Happy Hour</button>
+                    <button class="filter-toggle" data-filter="music" onclick="toggleDiningFilter('music')">🎵 Live Music</button>
+                </div>
+                <div class="cards" id="dining-cards"><div class="cards-loading">Loading restaurants...</div></div>
+            </div>
+            
+            <div class="category-content" id="beaches-content">
+                <button class="beach-safety-btn" onclick="openModal('beachSafetyModal')">
+                    <span>🏖️</span> Beach Rules & Safety Guide
+                    <span class="beach-safety-arrow">›</span>
+                </button>
+                <div class="safety-divider">Nearby Beach Access Points</div>
+                <div class="cards" id="beaches-cards"><div class="cards-loading">Loading nearby beaches...</div></div>
+            </div>
+            
+            <!-- Activities with dynamic categories -->
+            <div class="category-content" id="activities-content">
+                <div class="subcategory-pills" id="activities-pills">
+                    <div class="cards-loading">Loading categories...</div>
+                </div>
+                <!-- Sub-pills for categories that need them -->
+                <div class="subcategory-pills activity-subpills" id="activity-subpills" style="display: none; margin-top: 0.5rem;"></div>
+                <div class="cards" id="activities-cards"><div class="cards-loading">Select a category above</div></div>
+            </div>
+            
+            <!-- Rentals with subcategories -->
+            <div class="category-content" id="rentals-content">
+                <div class="subcategory-pills" id="rentals-pills">Loading categories...</div>
+                <div class="cards" id="rentals-cards"><div class="cards-loading">Loading rentals...</div></div>
+            </div>
+            
+            <div class="category-content" id="grocery-content"><div class="cards" id="grocery-cards"><div class="cards-loading">Loading...</div></div></div>
+            <div class="category-content" id="pets-content"><div class="cards" id="pets-cards"><div class="cards-loading">Loading pet-friendly spots...</div></div></div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal-overlay" id="doorCodeModal" onclick="closeModal('doorCodeModal',event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title">🚪 Door Code</div>
+                <button class="modal-close" onclick="closeModal('doorCodeModal')">&times;</button>
+            </div>
+            <div class="modal-section">
+                <div class="modal-section-title">Your Code</div>
+                <div class="modal-section-content" style="font-size: 1.5rem; font-weight: 700; color: var(--coral);" id="doorCodeDisplay">Loading...</div>
+            </div>
+            <div class="modal-section" id="doorCodeInstSection">
+                <div class="modal-section-title">Instructions</div>
+                <ul class="modal-list" id="doorCodeInstructions"></ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="checkoutModal" onclick="closeModal('checkoutModal',event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title">Check In & Out</div>
+                <button class="modal-close" onclick="closeModal('checkoutModal')">&times;</button>
+            </div>
+            <div class="modal-section">
+                <div class="modal-section-title">🔑 Check-In</div>
+                <div class="modal-section-content">
+                    <strong>Time:</strong> <span id="checkinTime">4:00 PM</span> CT<br><br>
+                    <span id="checkinInstructions">The door code will be sent via text by 4pm CT.</span>
+                </div>
+            </div>
+            <div class="modal-section">
+                <div class="modal-section-title">🕐 Check-Out</div>
+                <div class="modal-section-content">
+                    <strong>Time:</strong> <span id="checkoutTime">10:00 AM</span> CT
+                </div>
+            </div>
+            <div class="modal-section">
+                <div class="modal-section-title">✅ Checkout Checklist</div>
+                <ul class="modal-list" id="checkoutList">
+                    <li>Loading checkout instructions...</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="emergencyModal" onclick="closeModal('emergencyModal',event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title">Emergency Info</div>
+                <button class="modal-close" onclick="closeModal('emergencyModal')">&times;</button>
+            </div>
+            <div class="modal-section">
+                <div class="modal-section-title">🚨 Medical Emergency</div>
+                <div class="modal-section-content">
+                    <div class="emergency-number"><span>📞</span><a href="tel:911">Call 911</a></div>
+                    Tell them you're at:<br><strong id="emergencyAddress">Loading...</strong>
+                </div>
+            </div>
+            <div class="modal-section" id="emergencyContactsSection" style="display:none;">
+                <div class="modal-section-title">📞 Emergency Contacts</div>
+                <div class="modal-section-content" id="emergencyContactsList"></div>
+            </div>
+            <div class="modal-section">
+                <div class="modal-section-title">🏠 Property Manager</div>
+                <div class="modal-section-content">
+                    For non-emergencies:<br>
+                    <strong id="pmNameEmergency">Loading...</strong><br>
+                    <a href="#" id="pmPhoneLinkEmergency">(---) --------</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="propertyModal" onclick="closeModal('propertyModal',event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title">About Your Home</div>
+                <button class="modal-close" onclick="closeModal('propertyModal')">&times;</button>
+            </div>
+            <!-- Dynamic sections will be populated here -->
+            <div id="propertyModalContent"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="beachSafetyModal" onclick="closeModal('beachSafetyModal',event)">
+        <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <div class="modal-title">🏖️ Beach Rules & Safety Guide</div>
+                <button class="modal-close" onclick="closeModal('beachSafetyModal')">&times;</button>
+            </div>
+            <div class="modal-section">
+                <div class="modal-section-title">🚩 Beach Flag System</div>
+                <div class="modal-section-content">
+                    <div class="flag-grid">
+                        <div class="flag-item"><span class="flag-dot" style="background:#22c55e;"></span><strong>Green:</strong> Low hazard, calm conditions</div>
+                        <div class="flag-item"><span class="flag-dot" style="background:#eab308;"></span><strong>Yellow:</strong> Medium hazard, moderate surf/currents</div>
+                        <div class="flag-item"><span class="flag-dot" style="background:#ef4444;"></span><strong>Red:</strong> High hazard, rough conditions</div>
+                        <div class="flag-item"><span class="flag-dot" style="background:#ef4444;border:2px solid #991b1b;"></span><strong>Double Red:</strong> Water CLOSED</div>
+                        <div class="flag-item"><span class="flag-dot" style="background:#a855f7;"></span><strong>Purple:</strong> Dangerous marine life present</div>
+                    </div>
+                    <a href="https://www.swfd.org/beach-safety/" target="_blank" class="safety-link">Check Current Flag Status →</a>
+                </div>
+            </div>
+            <div class="modal-section">
+                <div class="modal-section-title">🌊 Rip Current Safety</div>
+                <div class="modal-section-content">
+                    <strong>If caught in a rip current:</strong> Stay calm, don't fight it. Swim parallel to shore until free, then swim back. If you can't escape, float and wave for help.
+                </div>
+            </div>
+            <div class="modal-section">
+                <div class="modal-section-title">📋 Beach Rules</div>
+                <div class="modal-section-content">
+                    <div class="safety-list">
+                        <div>🚫 No glass containers on beach</div>
+                        <div>🐕 Dog permits required (Walton County residents only)</div>
+                        <div>🌿 Stay off the dunes – they protect against storms</div>
+                        <div>⛺ Tents must be 10'x10' or smaller, top 1/3 of beach only</div>
+                        <div>🔊 No amplified sound audible beyond 100 feet</div>
+                        <div>🧹 Leave no trace – items left overnight will be removed</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-section">
+                <div class="modal-section-title">☀️ Sun Protection</div>
+                <div class="modal-section-content">
+                    Apply SPF 30+ sunscreen, reapply every 2 hours. Seek shade 10am-4pm. Wear hats & sunglasses.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button type="button" class="floating-lucy" onclick="talkToLucy()"><span>🎙️</span> Talk to Lucy</button>
+
+    <script>
+        const pathParts = window.location.pathname.split('/').filter(p => p);
+        const slug = pathParts[0] || 'hookweimsinker';
+        let propertyData = null, pmGroupData = null, propertyZone = null, wifiPassword = '';
+        
+        // ========== ANALYTICS TRACKING ==========
+        const sessionId = 'sess_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+        
+        async function logEvent(eventType, eventDetail = '', eventCategory = '') {
+            try {
+                await fetch('/.netlify/functions/log-analytics', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        property_slug: slug,
+                        event_type: eventType,
+                        event_detail: eventDetail,
+                        event_category: eventCategory,
+                        session_id: sessionId,
+                        user_agent: navigator.userAgent
+                    })
+                });
+            } catch (e) {
+                console.log('Analytics error (non-blocking):', e);
+            }
+        }
+        
+        // For link clicks that navigate away — sendBeacon survives page unload
+        function sendBeaconEvent(eventType, eventDetail, eventCategory) {
+            try {
+                const data = JSON.stringify({
+                    property_slug: slug,
+                    event_type: eventType,
+                    event_detail: eventDetail,
+                    event_category: eventCategory,
+                    session_id: sessionId,
+                    user_agent: navigator.userAgent
+                });
+                navigator.sendBeacon('/.netlify/functions/log-analytics', 
+                    new Blob([data], { type: 'application/json' }));
+            } catch (e) {
+                console.log('Beacon error (non-blocking):', e);
+            }
+        }
+
+        // Log app open on page load
+        window.addEventListener('load', () => {
+            logEvent('app_open', document.referrer || 'direct', 'session');
+        });
+
+        // Log batch impressions when business cards are shown to guests
+        async function logImpressions(places, category) {
+            try {
+                const impressions = places.map(p => ({
+                    name: p.name || p.Name || 'Unknown',
+                    category: category
+                }));
+                await fetch('/.netlify/functions/log-analytics', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        property_slug: slug,
+                        session_id: sessionId,
+                        user_agent: navigator.userAgent,
+                        impressions: impressions
+                    })
+                });
+            } catch (e) {
+                console.log('Impression logging error (non-blocking):', e);
+            }
+        }
+        // ========== END ANALYTICS ==========
+
+        document.addEventListener('DOMContentLoaded', () => { loadPropertyData(); });
+
+        async function loadPropertyData() {
+            try {
+                const response = await fetch(`/.netlify/functions/get-property?slug=${slug}`);
+                const data = await response.json();
+                if (!data.success) throw new Error(data.error);
+                
+                propertyData = data.property;
+                pmGroupData = data.pmGroup || {};
+                propertyZone = data.property.zone || data.zone;
+                console.log('Property data:', propertyData);
+                console.log('PM Group data:', pmGroupData);
+                console.log('Property zone:', propertyZone);
+
+                document.title = `${propertyData.name || 'Your Stay'} | Lucy Concierge`;
+                document.getElementById('propertyName').textContent = propertyData.name || 'Your Vacation Home';
+                
+                // Load logo from PM Group Airtable attachment
+                if (pmGroupData.logo && pmGroupData.logo.length > 0) {
+                    const logoUrl = pmGroupData.logo[0].url;
+                    const logoImg = document.getElementById('propertyLogo');
+                    logoImg.src = logoUrl;
+                    logoImg.style.display = 'block';
+                    document.getElementById('logo-fallback').style.display = 'none';
+                }
+                
+                document.getElementById('wifiNetwork').textContent = propertyData.wifi_name || 'N/A';
+                wifiPassword = propertyData.wifi_password || '';
+                document.getElementById('wifiPassword').textContent = wifiPassword || 'N/A';
+
+                // Door code - check various possible field names from Properties table
+                const doorCode = propertyData.door_code || propertyData['Door Code'] || propertyData['door code'] || 
+                                 propertyData.doorCode || propertyData.Door_Code ||
+                                 pmGroupData.door_code || pmGroupData['Door Code'] || 'Sent via text';
+                document.getElementById('doorCode').textContent = doorCode.length > 15 ? 'Tap for code' : doorCode;
+                document.getElementById('doorCodeDisplay').textContent = doorCode;
+                
+                // Populate door code instructions modal
+                const doorCodeInst = propertyData.door_code_inst || '';
+                if (doorCodeInst) {
+                    // Split by newlines and create list items, removing leading dashes or bullets
+                    const doorCodeItems = doorCodeInst.split(/\n+/).filter(item => item.trim() !== '');
+                    if (doorCodeItems.length > 0) {
+                        document.getElementById('doorCodeInstructions').innerHTML = doorCodeItems.map(item => {
+                            // Remove leading dash, bullet, asterisk, or number
+                            const cleanItem = item.trim().replace(/^[-•*]\s*/, '').replace(/^\d+\.\s*/, '');
+                            return `<li>${cleanItem}</li>`;
+                        }).join('');
+                    }
+                } else {
+                    document.getElementById('doorCodeInstSection').style.display = 'none';
+                }
+
+                let checkinTime = propertyData.checkin_time || pmGroupData.standard_checkin_time || '4:00 PM';
+                let checkoutTime = propertyData.checkout_time || pmGroupData.standard_checkout_time || '10:00 AM';
+                // Handle arrays from Airtable
+                if (Array.isArray(checkinTime)) checkinTime = checkinTime[0] || '4:00 PM';
+                if (Array.isArray(checkoutTime)) checkoutTime = checkoutTime[0] || '10:00 AM';
+                document.getElementById('checkTimes').innerHTML = `In: ${String(checkinTime).replace(':00','')}<br>Out: ${String(checkoutTime).replace(':00','')}`;
+                document.getElementById('checkinTime').textContent = checkinTime;
+                document.getElementById('checkoutTime').textContent = checkoutTime;
+
+                // Populate check-in instructions
+                const checkinInst = propertyData.checkin_instructions || pmGroupData.standard_checkin_instructions || '';
+                if (checkinInst) {
+                    document.getElementById('checkinInstructions').innerHTML = checkinInst.replace(/\n/g, '<br>');
+                }
+
+                // Populate checkout checklist from Airtable
+                // Check for actual content, not just existence
+                let checkoutInst = '';
+                if (propertyData.checkout_instructions && propertyData.checkout_instructions.trim()) {
+                    checkoutInst = propertyData.checkout_instructions.trim();
+                } else if (pmGroupData.standard_checkout_instructions && pmGroupData.standard_checkout_instructions.trim()) {
+                    checkoutInst = pmGroupData.standard_checkout_instructions.trim();
+                }
+                console.log('Checkout instructions raw:', checkoutInst);
+                
+                if (checkoutInst) {
+                    // Handle various formats: newlines, numbered lists (1. 2. 3.), or bullet points
+                    let checkoutItems = [];
+                    
+                    // First try splitting by newlines
+                    checkoutItems = checkoutInst.split(/\n+/).filter(item => item.trim() !== '');
+                    console.log('After split, items:', checkoutItems);
+                    
+                    // If only one item, try splitting by numbered pattern (1. 2. 3. etc)
+                    if (checkoutItems.length <= 1) {
+                        checkoutItems = checkoutInst.split(/(?=\d+\.\s)/).filter(item => item.trim() !== '');
+                        console.log('After numbered split, items:', checkoutItems);
+                    }
+                    
+                    if (checkoutItems.length > 0) {
+                        // Remove leading numbers like "1. " or "2. " since we're using bullet list
+                        const listHtml = checkoutItems.map(item => {
+                            const cleanItem = item.trim().replace(/^\d+\.\s*/, '');
+                            return `<li>${cleanItem}</li>`;
+                        }).join('');
+                        console.log('Final list HTML:', listHtml);
+                        document.getElementById('checkoutList').innerHTML = listHtml;
+                    }
+                } else {
+                    console.log('No checkout instructions found');
+                }
+
+                const address = propertyData.address || '';
+                document.getElementById('directionsLink').href = `https://maps.google.com/?q=${encodeURIComponent(address)}`;
+                document.getElementById('emergencyAddress').textContent = address;
+                
+                // Set property coordinates for distance calculations
+                propertyLat = parseFloat(propertyData.latitude || propertyData.lat || propertyData.Latitude || propertyData.Lat);
+                propertyLng = parseFloat(propertyData.longitude || propertyData.lng || propertyData.Longitude || propertyData.Lng || propertyData.long || propertyData.Long);
+                console.log('Property coordinates:', propertyLat, propertyLng);
+                
+                // Load weather using property coordinates
+                loadBeachConditions();
+
+                const pmPhone = pmGroupData.pm_contact_phone || propertyData.property_manager_phone || '';
+                const pmName = pmGroupData.pm_contact_name || propertyData.property_manager_name || 'Property Manager';
+                const pmCompany = pmGroupData.pm_company || '';
+                
+                document.getElementById('pmPhoneLink').textContent = formatPhone(pmPhone);
+                document.getElementById('pmPhoneLink').href = `tel:${String(pmPhone).replace(/\D/g,'')}`;
+                document.getElementById('pmPhoneLinkEmergency').textContent = formatPhone(pmPhone);
+                document.getElementById('pmPhoneLinkEmergency').href = `tel:${String(pmPhone).replace(/\D/g,'')}`;
+                document.getElementById('pmNameEmergency').textContent = pmCompany ? `${pmCompany} - ${pmName}` : pmName;
+
+                // Populate emergency contacts from Property Management Group
+                const emergencyContact = pmGroupData.emergency_contact || '';
+                if (emergencyContact) {
+                    // Split by newlines to get each contact
+                    const contacts = emergencyContact.split('\n').filter(c => c.trim());
+                    if (contacts.length > 0) {
+                        let contactsHtml = '';
+                        contacts.forEach(contact => {
+                            // Extract phone number from contact line (look for pattern like (xxx) xxx-xxxx or xxx-xxx-xxxx)
+                            const phoneMatch = contact.match(/[\d\(\)\-\.\s]{10,}/);
+                            if (phoneMatch) {
+                                const phoneRaw = phoneMatch[0].replace(/\D/g, '');
+                                const phoneFormatted = formatPhone(phoneRaw);
+                                // Get the label (text before the phone number)
+                                const label = contact.replace(phoneMatch[0], '').replace(/[-:]/g, '').trim();
+                                // Format: label outside, only phone in the shaded box
+                                contactsHtml += `<div class="emergency-contact-item">
+                                    <div class="emergency-contact-label">${label}</div>
+                                    <div class="emergency-number"><span>📞</span><a href="tel:${phoneRaw}">${phoneFormatted}</a></div>
+                                </div>`;
+                            }
+                        });
+                        if (contactsHtml) {
+                            document.getElementById('emergencyContactsList').innerHTML = contactsHtml;
+                            document.getElementById('emergencyContactsSection').style.display = 'block';
+                        }
+                    }
+                }
+
+                // PETS LOGIC - Show button if pets_allowed is true
+                if (propertyData.pets_allowed) {
+                    document.getElementById('petsBtn').classList.remove('hidden');
+                }
+
+                populatePropertyModal();
+
+                document.getElementById('loadingScreen').classList.add('hidden');
+                document.getElementById('mainContent').classList.add('loaded');
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('loadingScreen').innerHTML = '<div style="text-align:center;"><div style="font-size:2rem;margin-bottom:1rem;">😕</div><div>Unable to load property</div></div>';
+            }
+        }
+
+        function populatePropertyModal() {
+            const container = document.getElementById('propertyModalContent');
+            container.innerHTML = '';
+            
+            // Helper to format rich text from Airtable
+            const formatRichText = (text) => {
+                if (!text) return '';
+                const str = String(text);
+                
+                // Split by newlines
+                const lines = str.split(/\n+/).filter(line => line.trim() !== '');
+                
+                // If multiple lines, create a bullet list
+                if (lines.length > 1) {
+                    const listItems = lines.map(line => {
+                        // Remove leading dashes, bullets, asterisks, or numbers
+                        let cleanLine = line.trim()
+                            .replace(/^[-•*]\s*/, '')
+                            .replace(/^\d+\.\s*/, '')
+                            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                            .replace(/\*(.*?)\*/g, '<em>$1</em>');
+                        return `<li>${cleanLine}</li>`;
+                    }).join('');
+                    return `<ul class="modal-list">${listItems}</ul>`;
+                }
+                
+                // Single line - just format it normally
+                return str
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>');
+            };
+            
+            // Convert field_name to "Field Name" for display
+            const formatFieldName = (fieldName) => {
+                return fieldName
+                    .replace(/_/g, ' ')
+                    .replace(/([a-z])([A-Z])/g, '$1 $2')
+                    .replace(/\b\w/g, c => c.toUpperCase())
+                    .replace(/\bTv\b/g, 'TV')
+                    .replace(/\bWifi\b/g, 'WiFi')
+                    .replace(/\bPm\b/g, 'PM')
+                    .replace(/\bId\b/g, 'ID')
+                    .replace(/\bHvac\b/g, 'HVAC')
+                    .replace(/\bAc\b/g, 'AC');
+            };
+            
+            // Icon mapping based on keywords in field names
+            const getIcon = (fieldName) => {
+                const name = fieldName.toLowerCase();
+                if (name.includes('trash') || name.includes('garbage')) return '🗑️';
+                if (name.includes('grill') || name.includes('bbq')) return '🔥';
+                if (name.includes('pool')) return '🏊';
+                if (name.includes('hot_tub') || name.includes('hottub') || name.includes('jacuzzi')) return '♨️';
+                if (name.includes('bike')) return '🚲';
+                if (name.includes('beach_gear') || name.includes('beach_equipment')) return '🏖️';
+                if (name.includes('beach_access')) return '🏄';
+                if (name.includes('quiet') || name.includes('noise')) return '🤫';
+                if (name.includes('included') || name.includes('amenities') || name.includes('supplies')) return '🧴';
+                if (name.includes('cleaning')) return '🧹';
+                if (name.includes('rules')) return '📋';
+                if (name.includes('tv') || name.includes('streaming') || name.includes('entertainment')) return '📺';
+                if (name.includes('parking') || name.includes('garage') || name.includes('car')) return '🚗';
+                if (name.includes('wifi') || name.includes('internet') || name.includes('network')) return '📶';
+                if (name.includes('door') || name.includes('lock') || name.includes('key') || name.includes('code')) return '🚪';
+                if (name.includes('checkin') || name.includes('check_in') || name.includes('arrival')) return '📥';
+                if (name.includes('checkout') || name.includes('check_out') || name.includes('departure')) return '📤';
+                if (name.includes('emergency') || name.includes('safety') || name.includes('fire')) return '🚨';
+                if (name.includes('contact') || name.includes('phone') || name.includes('manager')) return '📞';
+                if (name.includes('welcome')) return '👋';
+                if (name.includes('direction') || name.includes('address') || name.includes('location')) return '📍';
+                if (name.includes('porch') || name.includes('light')) return '💡';
+                if (name.includes('hummingbird') || name.includes('bird') || name.includes('feeder')) return '🐦';
+                if (name.includes('stove') || name.includes('fireplace') || name.includes('wood')) return '🪵';
+                if (name.includes('pet') || name.includes('dog') || name.includes('cat')) return '🐕';
+                if (name.includes('laundry') || name.includes('washer') || name.includes('dryer')) return '🧺';
+                if (name.includes('kitchen') || name.includes('appliance')) return '🍳';
+                if (name.includes('bed') || name.includes('sleep') || name.includes('linen')) return '🛏️';
+                if (name.includes('towel') || name.includes('bath')) return '🛁';
+                return '📌';
+            };
+            
+            // Fields to exclude from display (metadata, already shown elsewhere, or internal)
+            const excludeFields = [
+                'id', 'slug', 'name', 'property_name', 'region', 'area', 'zone',
+                'latitude', 'longitude', 'lat', 'lng', 'long',
+                'address', 'directions', // shown elsewhere
+                'wifi_name', 'wifi_password', 'door_code', 'door_code_inst', // shown in quick access/door code modal
+                'checkin_time', 'checkout_time', // shown in quick access
+                'checkin_instructions', 'checkout_instructions', // shown in Check In & Out modal
+                'property_manager_name', 'property_manager_phone', // shown in contact
+                'pets_allowed', // boolean shown as button
+                'logo', 'Properties', // internal/linked fields
+                'pm_company', 'pm_contact_name', 'pm_contact_phone', 'pm_contact_email',
+                'standard_checkin_time', 'standard_checkout_time', // duplicates
+                'standard_checkin_instructions', 'standard_checkout_instructions', // shown in Check In & Out modal
+                'emergency_contact', // shown in Emergency modal
+                'standard_quiet_hours', 'quiet_hours', // removed from airtable
+            ];
+            
+            // Check if value is empty or should be skipped
+            const isEmpty = (value) => {
+                if (value === null || value === undefined) return true;
+                if (typeof value === 'string' && value.trim() === '') return true;
+                if (Array.isArray(value) && value.length === 0) return true;
+                if (typeof value === 'boolean') return false; // booleans are valid
+                return false;
+            };
+            
+            // Create a section element
+            const createSection = (fieldName, content, source) => {
+                const section = document.createElement('div');
+                section.className = 'modal-section';
+                section.innerHTML = `
+                    <div class="modal-section-title">${getIcon(fieldName)} ${formatFieldName(fieldName)}</div>
+                    <div class="modal-section-content">${formatRichText(content)}</div>
+                `;
+                return section;
+            };
+            
+            // Track which fields we've already shown (to avoid duplicates)
+            const shownFields = new Set();
+            
+            // Process fields from an object
+            const processFields = (data, source) => {
+                if (!data) return;
+                
+                for (const [key, value] of Object.entries(data)) {
+                    // Skip excluded fields
+                    if (excludeFields.some(f => key.toLowerCase().includes(f.toLowerCase()))) continue;
+                    
+                    // Skip empty values
+                    if (isEmpty(value)) continue;
+                    
+                    // Skip if already shown (check normalized key)
+                    const normalizedKey = key.toLowerCase().replace(/standard_/g, '');
+                    if (shownFields.has(normalizedKey)) continue;
+                    
+                    // Handle arrays (join them)
+                    let displayValue = value;
+                    if (Array.isArray(value)) {
+                        displayValue = value.filter(v => v && String(v).trim()).join(', ');
+                        if (!displayValue) continue;
+                    }
+                    
+                    // Handle booleans
+                    if (typeof value === 'boolean') {
+                        displayValue = value ? 'Yes' : 'No';
+                    }
+                    
+                    // Create and add section
+                    const section = createSection(key, displayValue, source);
+                    container.appendChild(section);
+                    shownFields.add(normalizedKey);
+                }
+            };
+            
+            // First show property-specific data (takes priority)
+            processFields(propertyData, 'property');
+            
+            // Then show PM Group data (fills in gaps)
+            processFields(pmGroupData, 'pmGroup');
+            
+            // If no content was added, show a message
+            if (container.children.length === 0) {
+                container.innerHTML = '<div class="modal-section"><div class="modal-section-content" style="text-align:center;color:var(--gray);">No additional property information available.</div></div>';
+            }
+        }
+
+        async function loadBeachConditions() {
+            try {
+                // Use property coordinates if available, otherwise default to Inlet Beach
+                const lat = propertyLat || 30.28;
+                const lon = propertyLng || -86.00;
+                
+                // Fetch weather with is_day parameter for day/night icons
+                const weatherResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code,is_day&temperature_unit=fahrenheit&timezone=America%2FChicago`);
+                const weatherData = await weatherResponse.json();
+                
+                if (weatherData.current) {
+                    const temp = Math.round(weatherData.current.temperature_2m);
+                    const weatherCode = weatherData.current.weather_code;
+                    const isDay = weatherData.current.is_day; // 1 = day, 0 = night
+                    
+                    // Map weather codes to icons with day/night variants
+                    let weatherIcon;
+                    
+                    if (isDay === 1) {
+                        // Daytime icons
+                        const dayIcons = {
+                            0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️',
+                            45: '🌫️', 48: '🌫️',
+                            51: '🌧️', 53: '🌧️', 55: '🌧️',
+                            61: '🌧️', 63: '🌧️', 65: '🌧️',
+                            71: '🌨️', 73: '🌨️', 75: '🌨️',
+                            80: '🌧️', 81: '🌧️', 82: '🌧️',
+                            95: '⛈️', 96: '⛈️', 99: '⛈️'
+                        };
+                        weatherIcon = dayIcons[weatherCode] || '🌤️';
+                    } else {
+                        // Nighttime icons
+                        const nightIcons = {
+                            0: '🌙', 1: '🌙', 2: '☁️', 3: '☁️',
+                            45: '🌫️', 48: '🌫️',
+                            51: '🌧️', 53: '🌧️', 55: '🌧️',
+                            61: '🌧️', 63: '🌧️', 65: '🌧️',
+                            71: '🌨️', 73: '🌨️', 75: '🌨️',
+                            80: '🌧️', 81: '🌧️', 82: '🌧️',
+                            95: '⛈️', 96: '⛈️', 99: '⛈️'
+                        };
+                        weatherIcon = nightIcons[weatherCode] || '🌙';
+                    }
+                    
+                    document.getElementById('weatherIcon').textContent = weatherIcon;
+                    document.getElementById('weatherValue').textContent = `${temp}°F`;
+                }
+                
+                // Fetch sunset time
+                const sunResponse = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=sunrise,sunset&timezone=America%2FChicago&forecast_days=1`);
+                const sunData = await sunResponse.json();
+                
+                if (sunData.daily) {
+                    // API returns time in the requested timezone (Central), so parse directly
+                    const sunsetStr = sunData.daily.sunset[0]; // Format: "2026-02-01T17:20"
+                    const timePart = sunsetStr.split('T')[1]; // "17:20"
+                    const [hours, minutes] = timePart.split(':');
+                    const hour = parseInt(hours);
+                    const ampm = hour >= 12 ? 'PM' : 'AM';
+                    const hour12 = hour % 12 || 12;
+                    document.getElementById('sunsetValue').textContent = `${hour12}:${minutes} ${ampm}`;
+                }
+
+                // Fetch beach flag status from our Airtable-backed endpoint
+                try {
+                    const flagResponse = await fetch('/.netlify/functions/get-beach-flags');
+                    const flagData = await flagResponse.json();
+                    
+                    if (flagData.flagColor && flagData.flagColor !== 'unknown') {
+                        const color = flagData.flagColor.toLowerCase();
+                        const flagIcons = {
+                            'green': '🟢',
+                            'yellow': '🟡',
+                            'red': '🔴',
+                            'double red': '🔴🔴',
+                            'purple': '🟣'
+                        };
+                        const flagLabels = {
+                            'green': 'Green',
+                            'yellow': 'Yellow',
+                            'red': 'Red',
+                            'double red': 'Double Red',
+                            'purple': 'Purple'
+                        };
+                        
+                        // Handle compound flags like "yellow / purple"
+                        let icon = flagIcons[color] || '🏳️';
+                        let label = flagLabels[color] || color;
+                        
+                        if (color.includes('/')) {
+                            const colors = color.split('/').map(c => c.trim());
+                            icon = colors.map(c => flagIcons[c] || '🏳️').join('');
+                            label = colors.map(c => flagLabels[c] || c).join(' / ');
+                        }
+                        
+                        document.getElementById('flagIcon').textContent = icon;
+                        document.getElementById('flagValue').textContent = label;
+                        document.getElementById('flagValue').style.fontSize = '0.85rem';
+                    } else {
+                        document.getElementById('flagValue').textContent = 'Check Status →';
+                    }
+                } catch (flagErr) {
+                    console.error('Beach flag fetch error:', flagErr);
+                    document.getElementById('flagValue').textContent = 'Check Status →';
+                }
+            } catch (e) { 
+                console.error('Beach conditions error:', e);
+                document.getElementById('weatherValue').textContent = '--°';
+                document.getElementById('sunsetValue').textContent = '--:--';
+            }
+        }
+
+        function formatPhone(phone) {
+            if (!phone) return '(---) --------';
+            phone = String(phone); // Convert to string in case it's a number
+            const c = phone.replace(/\D/g,'');
+            return c.length === 10 ? `(${c.slice(0,3)}) ${c.slice(3,6)}-${c.slice(6)}` : phone;
+        }
+
+        function toggleCategory(category) {
+            const btn = document.querySelector(`[data-category="${category}"]`);
+            const content = document.getElementById(`${category}-content`);
+            if (btn.classList.contains('active')) { btn.classList.remove('active'); content.classList.remove('active'); return; }
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.category-content').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active'); content.classList.add('active');
+            loadCategoryContent(category);
+            setTimeout(() => content.scrollIntoView({behavior:'smooth',block:'nearest'}), 100);
+            
+            // Track category click
+            logEvent('category_click', category, 'navigation');
+        }
+
+        let allBeaches = []; // Store all beaches for "Show More"
+        let allRentals = []; // Store all rentals for filtering
+
+        // Zone proximity sorting - closest zones first based on property location
+        function getZoneOrder(fromZone) {
+            const zoneProximity = {
+                'east-30a': ['east-30a', 'central-30a', 'west-30a', 'pcb', 'all-zones'],
+                'central-30a': ['central-30a', 'east-30a', 'west-30a', 'pcb', 'all-zones'],
+                'west-30a': ['west-30a', 'central-30a', 'east-30a', 'pcb', 'all-zones'],
+                'pcb': ['pcb', 'east-30a', 'central-30a', 'west-30a', 'all-zones']
+            };
+            return zoneProximity[fromZone] || ['east-30a', 'central-30a', 'west-30a', 'pcb', 'all-zones'];
+        }
+        
+        function sortByZoneProximity(items, category = '') {
+            const zoneOrder = getZoneOrder(propertyZone);
+            
+            // For grocery, prioritize major stores (Publix, Walmart, etc.)
+            if (category === 'grocery') {
+                const majorStores = ['publix', 'walmart', 'winn-dixie', 'winn dixie', 'kroger', 'aldi'];
+                return items.sort((a, b) => {
+                    const nameA = (a.name || a.Name || '').toLowerCase();
+                    const nameB = (b.name || b.Name || '').toLowerCase();
+                    const isMajorA = majorStores.some(store => nameA.includes(store));
+                    const isMajorB = majorStores.some(store => nameB.includes(store));
+                    
+                    // Major stores first
+                    if (isMajorA && !isMajorB) return -1;
+                    if (!isMajorA && isMajorB) return 1;
+                    
+                    // Then by zone proximity
+                    const zoneA = a.zone || a.Zone || 'all-zones';
+                    const zoneB = b.zone || b.Zone || 'all-zones';
+                    const indexA = zoneOrder.indexOf(zoneA);
+                    const indexB = zoneOrder.indexOf(zoneB);
+                    const orderA = indexA === -1 ? 999 : indexA;
+                    const orderB = indexB === -1 ? 999 : indexB;
+                    return orderA - orderB;
+                });
+            }
+            
+            // Default zone-based sorting
+            return items.sort((a, b) => {
+                const zoneA = a.zone || a.Zone || a.zones_served || 'all-zones';
+                const zoneB = b.zone || b.Zone || b.zones_served || 'all-zones';
+                const indexA = zoneOrder.indexOf(zoneA);
+                const indexB = zoneOrder.indexOf(zoneB);
+                const orderA = indexA === -1 ? 999 : indexA;
+                const orderB = indexB === -1 ? 999 : indexB;
+                return orderA - orderB;
+            });
+        }
+        
+        // Show All functions - fetch ALL items and sort by proximity
+        async function showAllDining() {
+            const container = document.getElementById('dining-cards');
+            container.innerHTML = '<div class="cards-loading">Loading all restaurants...</div>';
+            try {
+                const response = await fetch(`/.netlify/functions/get-places?category=restaurants&zone=all`);
+                const data = await response.json();
+                if (data.success && data.places?.length) {
+                    const sorted = sortByZoneProximity(data.places);
+                    allDining = sorted;
+                    // Apply current filters
+                    renderDining(getFilteredDining(), getFilteredDining().length);
+                } else {
+                    container.innerHTML = '<div class="cards-loading">No restaurants found</div>';
+                }
+            } catch (e) {
+                console.error('Error loading all dining:', e);
+                container.innerHTML = '<div class="cards-loading">Error loading restaurants</div>';
+            }
+        }
+        
+        async function showAllBeaches() {
+            const container = document.getElementById('beaches-cards');
+            container.innerHTML = '<div class="cards-loading">Loading all beaches...</div>';
+            try {
+                const response = await fetch(`/.netlify/functions/get-places?category=beaches&zone=all`);
+                const data = await response.json();
+                if (data.success && data.places?.length) {
+                    const sorted = sortByZoneProximity(data.places);
+                    allBeaches = sorted;
+                    renderBeaches(allBeaches.length);
+                } else {
+                    container.innerHTML = '<div class="cards-loading">No beaches found</div>';
+                }
+            } catch (e) {
+                console.error('Error loading all beaches:', e);
+                container.innerHTML = '<div class="cards-loading">Error loading beaches</div>';
+            }
+        }
+        
+        async function showAllGrocery() {
+            const container = document.getElementById('grocery-cards');
+            container.innerHTML = '<div class="cards-loading">Calculating distances...</div>';
+            try {
+                const response = await fetch(`/.netlify/functions/get-places?category=grocery&zone=all`);
+                const data = await response.json();
+                if (data.success && data.places?.length) {
+                    allGrocery = await sortGroceryByDistance(data.places);
+                    renderGrocery(allGrocery.length);
+                } else {
+                    container.innerHTML = '<div class="cards-loading">No stores found</div>';
+                }
+            } catch (e) {
+                console.error('Error loading all grocery:', e);
+                container.innerHTML = '<div class="cards-loading">Error loading stores</div>';
+            }
+        }
+        
+        async function showAllPets() {
+            const container = document.getElementById('pets-cards');
+            container.innerHTML = '<div class="cards-loading">Loading all pet-friendly spots...</div>';
+            try {
+                const response = await fetch(`/.netlify/functions/get-places?category=pets&zone=all`);
+                const data = await response.json();
+                if (data.success && data.places?.length) {
+                    const sorted = sortByZoneProximity(data.places);
+                    allPets = sorted;
+                    renderPets(allPets.length);
+                } else {
+                    container.innerHTML = '<div class="cards-loading">No pet-friendly spots found</div>';
+                }
+            } catch (e) {
+                console.error('Error loading all pets:', e);
+                container.innerHTML = '<div class="cards-loading">Error loading pet-friendly spots</div>';
+            }
+        }
+
+        async function loadCategoryContent(category) {
+            const container = document.getElementById(`${category}-cards`);
+            if (container.dataset.loaded === 'true') return;
+            
+            if (!propertyZone) {
+                console.error('No property zone set');
+                return;
+            }
+            
+            console.log(`Loading ${category} for zone: ${propertyZone}`);
+            
+            try {
+                if (category === 'activities') {
+                    await loadActivities();
+                } else if (category === 'rentals') {
+                    await loadRentals();
+                } else if (category === 'beaches') {
+                    const response = await fetch(`/.netlify/functions/get-places?category=beaches&zone=${propertyZone}`);
+                    const data = await response.json();
+                    console.log('Beaches response:', data);
+                    if (data.success && data.places?.length) {
+                        allBeaches = data.places;
+                        renderBeaches(3);
+                    } else {
+                        container.innerHTML = '<div class="cards-loading">No beaches found</div>';
+                    }
+                } else if (category === 'dining') {
+                    console.log('Fetching dining for zone:', propertyZone);
+                    const response = await fetch(`/.netlify/functions/get-places?category=restaurants&zone=${propertyZone}`);
+                    const data = await response.json();
+                    console.log('Dining API response:', data);
+                    if (data.success && data.places?.length) {
+                        allDining = data.places;
+                        console.log('Loaded', allDining.length, 'restaurants');
+                        console.log('First restaurant:', allDining[0]);
+                        renderFilteredDining();
+                    } else {
+                        console.log('No restaurants returned or error:', data);
+                        container.innerHTML = '<div class="cards-loading">No restaurants found</div>';
+                    }
+                } else if (category === 'grocery') {
+                    const response = await fetch(`/.netlify/functions/get-places?category=grocery&zone=all`);
+                    const data = await response.json();
+                    console.log('Grocery response:', data);
+                    if (data.success && data.places?.length) {
+                        container.innerHTML = `<div class="cards-loading">Calculating distances for ${data.places.length} stores...</div>`;
+                        // Sort by distance (async - geocodes addresses if needed)
+                        allGrocery = await sortGroceryByDistance(data.places);
+                        renderGrocery(allGrocery.length); // Show all
+                    } else {
+                        container.innerHTML = '<div class="cards-loading">No grocery stores found</div>';
+                    }
+                } else if (category === 'pets') {
+                    const response = await fetch(`/.netlify/functions/get-places?category=pets&zone=${propertyZone}`);
+                    const data = await response.json();
+                    console.log('Pets response:', data);
+                    if (data.success && data.places?.length) {
+                        allPets = data.places;
+                        renderPets(3);
+                    } else {
+                        container.innerHTML = '<div class="cards-loading">No pet-friendly spots found</div>';
+                    }
+                }
+                container.dataset.loaded = 'true';
+            } catch (e) { 
+                console.error('Load error:', e);
+                container.innerHTML = '<div class="cards-loading">Error loading</div>'; 
+            }
+        }
+        
+        // Dining
+        let allDining = [];
+        let diningFilters = { cuisine: 'all', outdoor: false, pet: false, happy: false, music: false };
+        
+        function filterDining(type, value) {
+            console.log('filterDining called:', type, value);
+            if (type === 'cuisine') {
+                diningFilters.cuisine = value;
+                document.querySelectorAll('#dining-cuisine-pills .subcategory-pill').forEach(p => p.classList.remove('active'));
+                document.querySelector(`#dining-cuisine-pills [data-cuisine="${value}"]`).classList.add('active');
+            }
+            renderFilteredDining();
+        }
+        
+        function toggleDiningFilter(filter) {
+            console.log('toggleDiningFilter called:', filter);
+            diningFilters[filter] = !diningFilters[filter];
+            document.querySelector(`#dining-toggles [data-filter="${filter}"]`).classList.toggle('active');
+            renderFilteredDining();
+        }
+        
+        function renderFilteredDining() {
+            console.log('renderFilteredDining - allDining count:', allDining.length);
+            console.log('renderFilteredDining - filters:', diningFilters);
+            
+            let filtered = [...allDining];
+            
+            // Filter by cuisine (handle both string and array formats)
+            if (diningFilters.cuisine !== 'all') {
+                filtered = filtered.filter(r => {
+                    if (!r.cuisine) return false;
+                    // Handle array (Airtable multi-select) or string
+                    const cuisineStr = Array.isArray(r.cuisine) ? r.cuisine.join(',') : String(r.cuisine);
+                    return cuisineStr.toLowerCase().includes(diningFilters.cuisine.toLowerCase());
+                });
+                console.log('After cuisine filter:', filtered.length);
+            }
+            
+            // Filter by toggles
+            if (diningFilters.outdoor) {
+                filtered = filtered.filter(r => r.outdoor_seating === 'checked' || r.outdoor_seating === 'Yes' || r.outdoor_seating === true);
+                console.log('After outdoor filter:', filtered.length);
+            }
+            if (diningFilters.pet) {
+                filtered = filtered.filter(r => r.pet_friendly === 'Yes');
+                console.log('After pet filter:', filtered.length);
+            }
+            if (diningFilters.happy) {
+                filtered = filtered.filter(r => r.happy_hour === 'Yes' || r.happy_hour === 'Check for specials');
+                console.log('After happy hour filter:', filtered.length);
+            }
+            if (diningFilters.music) {
+                filtered = filtered.filter(r => r.live_music === 'Yes' || r.live_music === 'checked' || r.live_music === true);
+                console.log('After live music filter:', filtered.length);
+            }
+            
+            console.log('Final filtered count:', filtered.length);
+            renderDining(filtered, 3);
+        }
+        
+        function renderDining(restaurants, count) {
+            console.log('renderDining called with', restaurants?.length, 'restaurants, showing', count);
+            const container = document.getElementById('dining-cards');
+            
+            if (!restaurants || !restaurants.length) {
+                container.innerHTML = '<div class="cards-loading">No restaurants match your filters</div>';
+                return;
+            }
+            
+            const toShow = restaurants.slice(0, count);
+            const hasMore = restaurants.length > count;
+            console.log('Showing', toShow.length, 'restaurants, hasMore:', hasMore);
+            
+            try {
+                let html = toShow.map(p => createDiningCard(p)).join('');
+                if (hasMore) {
+                    html += `<button class="show-more-btn" onclick="showAllDining()">Show All Restaurants</button>`;
+                }
+                container.innerHTML = html;
+                console.log('Dining cards rendered successfully');
+                logImpressions(toShow, 'dining');
+            } catch (e) {
+                console.error('Error rendering dining cards:', e);
+                container.innerHTML = '<div class="cards-loading">Error displaying restaurants</div>';
+            }
+        }
+        
+        function getFilteredDining() {
+            let filtered = [...allDining];
+            if (diningFilters.cuisine !== 'all') {
+                filtered = filtered.filter(r => {
+                    if (!r.cuisine) return false;
+                    const cuisineStr = Array.isArray(r.cuisine) ? r.cuisine.join(',') : String(r.cuisine);
+                    return cuisineStr.toLowerCase().includes(diningFilters.cuisine.toLowerCase());
+                });
+            }
+            if (diningFilters.outdoor) {
+                filtered = filtered.filter(r => r.outdoor_seating === 'checked' || r.outdoor_seating === 'Yes' || r.outdoor_seating === true);
+            }
+            if (diningFilters.pet) {
+                filtered = filtered.filter(r => r.pet_friendly === 'Yes');
+            }
+            if (diningFilters.happy) {
+                filtered = filtered.filter(r => r.happy_hour === 'Yes' || r.happy_hour === 'Check for specials');
+            }
+            if (diningFilters.music) {
+                filtered = filtered.filter(r => r.live_music === 'Yes' || r.live_music === 'checked' || r.live_music === true);
+            }
+            return filtered;
+        }
+        
+        function createDiningCard(restaurant) {
+            // Cuisine-based images
+            const cuisineImages = {
+                'Seafood': 'photo-1615141982883-c7ad0e69fd62',
+                'Sushi': 'photo-1579871494447-9811cf80d66c',
+                'Asian': 'photo-1552566626-52f8b828add9',
+                'Italian': 'photo-1595295333158-4742f28fbd85',
+                'American': 'photo-1550547660-d9450f859349',
+                'Mexican': 'photo-1565299585323-38d6b0865b47',
+                'Southern': 'photo-1532550907401-a500c9a57435',
+                'Spanish': 'photo-1515443961218-a51367888e4b',
+                'Tapas': 'photo-1544025162-d76694265947',
+                'Fine Dining': 'photo-1414235077428-338989a2e8c0',
+                'Bar': 'photo-1514933651103-005eec06c04b',
+                'Healthy': 'photo-1512621776951-a57141f2eefd',
+                'Desserts': 'photo-1551024506-0bccd828d307',
+                'Bakery': 'photo-1509440159596-0249088772ff',
+                'Fusion': 'photo-1504674900247-0877df9cc836',
+                'default': 'photo-1517248135467-4c7edcad34c4'
+            };
+            
+            // Convert cuisine to string (handle array from Airtable)
+            const cuisineStr = restaurant.cuisine 
+                ? (Array.isArray(restaurant.cuisine) ? restaurant.cuisine.join(', ') : String(restaurant.cuisine))
+                : '';
+            
+            // Get image based on first cuisine match
+            let imgId = cuisineImages['default'];
+            if (cuisineStr) {
+                for (const [cuisine, img] of Object.entries(cuisineImages)) {
+                    if (cuisineStr.includes(cuisine)) {
+                        imgId = img;
+                        break;
+                    }
+                }
+            }
+            
+            // Parse meals for B/L/D badges (handle array)
+            const mealsRaw = restaurant.meals || '';
+            const meals = (Array.isArray(mealsRaw) ? mealsRaw.join(',') : String(mealsRaw)).toLowerCase();
+            const hasBreakfast = meals.includes('breakfast') || meals.includes('brunch');
+            const hasLunch = meals.includes('lunch') || meals.includes('brunch');
+            const hasDinner = meals.includes('dinner');
+            
+            // Build meal badges HTML
+            let mealBadges = '<div class="meal-badges">';
+            mealBadges += `<span class="meal-badge ${hasBreakfast ? 'active' : ''}">B</span>`;
+            mealBadges += `<span class="meal-badge ${hasLunch ? 'active' : ''}">L</span>`;
+            mealBadges += `<span class="meal-badge ${hasDinner ? 'active' : ''}">D</span>`;
+            mealBadges += '</div>';
+            
+            // Link
+            let link = restaurant.website || 
+                       (restaurant.address ? `https://maps.google.com/?q=${encodeURIComponent(restaurant.address)}` : '#');
+            if (link && !link.startsWith('http')) link = `https://${link}`;
+            
+            // Price range display
+            const price = restaurant.price_range || '';
+            
+            // Feature icons
+            let features = [];
+            if (restaurant.outdoor_seating === 'checked' || restaurant.outdoor_seating === 'Yes') features.push('🌴');
+            if (restaurant.pet_friendly === 'Yes') features.push('🐕');
+            if (restaurant.happy_hour === 'Yes' || restaurant.happy_hour === 'Check for specials') features.push('🍹');
+            if (restaurant.live_music === 'Yes' || restaurant.live_music === 'checked' || restaurant.live_music === true) features.push('🎵');
+            const featureStr = features.length ? features.join(' ') + ' · ' : '';
+            
+            return `<a href="${link}" target="_blank" class="card dining-card">
+                <img src="https://images.unsplash.com/${imgId}?w=200&h=200&fit=crop" class="card-image">
+                <div class="card-content">
+                    <div class="card-title">${restaurant.name || 'Unknown'}${mealBadges}</div>
+                    <div class="card-subtitle">${cuisineStr} ${price ? '· ' + price : ''}</div>
+                    <div class="card-meta">${featureStr}${restaurant.area || ''}</div>
+                </div>
+                <span class="card-arrow">›</span>
+            </a>`;
+        }
+        
+        // Grocery
+        let allGrocery = [];
+        let propertyLat = null;
+        let propertyLng = null;
+        
+        // Geocode an address using Nominatim (OpenStreetMap)
+        async function geocodeAddress(address) {
+            try {
+                // Add FL, USA to help with accuracy
+                const searchAddress = address.includes('FL') ? address : address + ', FL, USA';
+                console.log('Geocoding:', searchAddress);
+                
+                const response = await fetch(
+                    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchAddress)}&limit=1`,
+                    {
+                        headers: {
+                            'Accept': 'application/json',
+                            'User-Agent': 'LucyConcierge/1.0'
+                        }
+                    }
+                );
+                
+                if (!response.ok) {
+                    console.error('Geocoding response not ok:', response.status);
+                    return null;
+                }
+                
+                const data = await response.json();
+                console.log('Geocoding result for', address, ':', data);
+                
+                if (data && data.length > 0) {
+                    return {
+                        lat: parseFloat(data[0].lat),
+                        lng: parseFloat(data[0].lon)
+                    };
+                }
+            } catch (e) {
+                console.error('Geocoding error for', address, ':', e);
+            }
+            return null;
+        }
+        
+        // Haversine formula to calculate distance between two lat/lng points
+        function calculateDistance(lat1, lng1, lat2, lng2) {
+            const R = 3959; // Earth's radius in miles
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLng = (lng2 - lng1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLng/2) * Math.sin(dLng/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c; // Distance in miles
+        }
+        
+        async function sortGroceryByDistance(items) {
+            // If we don't have property coordinates yet, try to geocode the property address
+            if (!propertyLat || !propertyLng || isNaN(propertyLat) || isNaN(propertyLng)) {
+                const propAddress = propertyData?.address;
+                if (propAddress) {
+                    console.log('Geocoding property address:', propAddress);
+                    const coords = await geocodeAddress(propAddress);
+                    if (coords) {
+                        propertyLat = coords.lat;
+                        propertyLng = coords.lng;
+                        console.log('Property coordinates from geocoding:', propertyLat, propertyLng);
+                    } else {
+                        console.log('Failed to geocode property address');
+                    }
+                }
+            }
+            
+            // If we have property coordinates, calculate actual distances
+            if (propertyLat && propertyLng && !isNaN(propertyLat) && !isNaN(propertyLng)) {
+                console.log('Calculating distances from property at:', propertyLat, propertyLng);
+                
+                // Process items and geocode if needed
+                for (let i = 0; i < items.length; i++) {
+                    const item = items[i];
+                    let storeLat = parseFloat(item.latitude || item.lat || item.Latitude || item.Lat);
+                    let storeLng = parseFloat(item.longitude || item.lng || item.Longitude || item.Lng || item.long || item.Long);
+                    
+                    // If no coordinates, try to geocode the address
+                    if ((!storeLat || !storeLng || isNaN(storeLat) || isNaN(storeLng)) && item.address) {
+                        // Add delay to avoid rate limiting (Nominatim requires 1 req/sec)
+                        await new Promise(resolve => setTimeout(resolve, 1100));
+                        const coords = await geocodeAddress(item.address);
+                        if (coords) {
+                            storeLat = coords.lat;
+                            storeLng = coords.lng;
+                            console.log(`Geocoded ${item.name}: ${storeLat}, ${storeLng}`);
+                        }
+                    }
+                    
+                    if (storeLat && storeLng && !isNaN(storeLat) && !isNaN(storeLng)) {
+                        item.calculatedDistance = calculateDistance(propertyLat, propertyLng, storeLat, storeLng);
+                        console.log(`Distance to ${item.name}: ${item.calculatedDistance.toFixed(1)} mi`);
+                    } else {
+                        item.calculatedDistance = 999; // No coordinates available
+                        console.log(`No coordinates for ${item.name}`);
+                    }
+                }
+                
+                return items.sort((a, b) => a.calculatedDistance - b.calculatedDistance);
+            }
+            
+            console.log('No property coordinates, falling back to zone sorting');
+            // Fallback to zone proximity if no property coordinates
+            const zoneOrder = getZoneOrder(propertyZone);
+            return items.sort((a, b) => {
+                const zoneA = a.zone || a.Zone || 'all-zones';
+                const zoneB = b.zone || b.Zone || 'all-zones';
+                const indexA = zoneOrder.indexOf(zoneA);
+                const indexB = zoneOrder.indexOf(zoneB);
+                const orderA = indexA === -1 ? 999 : indexA;
+                const orderB = indexB === -1 ? 999 : indexB;
+                return orderA - orderB;
+            });
+        }
+        
+        function renderGrocery(count) {
+            const container = document.getElementById('grocery-cards');
+            // Always show all stores
+            let html = allGrocery.map(p => createGroceryCard(p)).join('');
+            container.innerHTML = html;
+            logImpressions(allGrocery, 'grocery');
+        }
+        
+        function createGroceryCard(place) {
+            // Determine link
+            let link = place.map_link || place.website || 
+                       (place.address ? `https://maps.google.com/?q=${encodeURIComponent(place.address)}` : '#');
+            if (place.website && !place.website.startsWith('http')) link = `https://${place.website}`;
+            
+            // Build subtitle
+            let subtitle = place.description || place.category || '';
+            
+            // Build meta with calculated distance
+            let metaParts = [];
+            if (place.calculatedDistance && place.calculatedDistance < 999) {
+                metaParts.push(`${place.calculatedDistance.toFixed(1)} mi away`);
+            }
+            if (place.area || place.zone || place.Zone) {
+                metaParts.push(place.area || place.zone || place.Zone);
+            }
+            let meta = metaParts.join(' · ');
+            
+            const placeName = (place.name || 'Unknown').replace(/'/g, "\\'");
+            
+            return `<a href="${link}" target="_blank" class="card" onclick="logEvent('card_click', '${placeName}', 'grocery')">
+                <img src="https://images.unsplash.com/photo-1604719312566-8912e9227c6a?w=200&h=200&fit=crop" class="card-image">
+                <div class="card-content">
+                    <div class="card-title">${place.name||'Unknown'}</div>
+                    <div class="card-subtitle">${subtitle}</div>
+                    ${meta?`<div class="card-meta">📍 ${meta}</div>`:''}
+                </div>
+                <span class="card-arrow">›</span>
+            </a>`;
+        }
+        
+        // Pets
+        let allPets = [];
+        function renderPets(count) {
+            const container = document.getElementById('pets-cards');
+            const toShow = allPets.slice(0, count);
+            const hasMore = allPets.length > count;
+            
+            // Dog beach info card always first
+            let html = `<div class="card info-card" style="background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%); border-left: 4px solid #f0ad4e;">
+                <div class="card-content" style="padding: 16px;">
+                    <div class="card-title" style="color: #856404; font-size: 1.1em;">🐕 Dogs on the Beach</div>
+                    <div style="color: #856404; font-size: 0.95em; line-height: 1.5; margin: 8px 0;">
+                        <strong>30A beaches require a permit</strong> for dogs — but permits are only available to Walton County residents & property owners. Fines up to $500!
+                    </div>
+                    <div style="color: #856404; font-size: 0.95em; line-height: 1.5; margin: 8px 0;">
+                        <strong>Good news:</strong> Dog Beach at Pier Park (PCB) is permit-free! 🎉 About 20 min east at Beach Access 56-57. Rated one of the 30 best dog beaches in the US!
+                    </div>
+                    <a href="https://www.google.com/maps/dir/?api=1&destination=Dog+Beach+Panama+City+Beach+FL" target="_blank" style="display: inline-block; margin-top: 8px; padding: 8px 16px; background: #856404; color: white; border-radius: 20px; text-decoration: none; font-weight: 600; font-size: 0.9em;">
+                        📍 Get Directions to Dog Beach
+                    </a>
+                </div>
+            </div>`;
+            
+            html += toShow.map(p => createCard(p, 'pets')).join('');
+            if (hasMore) {
+                html += `<button class="show-more-btn" onclick="showAllPets()">Show All Pet-Friendly Spots</button>`;
+            }
+            container.innerHTML = html;
+            logImpressions(toShow, 'pets');
+        }
+        
+        // Activities - Dynamic Categories from Airtable
+        let allActivities = [];
+        let activitiesLoaded = false;
+        
+        async function loadActivities() {
+            if (activitiesLoaded) return;
+            
+            const pillsContainer = document.getElementById('activities-pills');
+            const container = document.getElementById('activities-cards');
+            
+            try {
+                const response = await fetch(`/.netlify/functions/get-places?category=activities&zone=all`);
+                const data = await response.json();
+                console.log('Activities response:', data);
+                
+                if (data.success && data.places?.length) {
+                    allActivities = data.places;
+                    activitiesLoaded = true;
+                    
+                    // Get unique categories - split any comma-separated values
+                    const allCats = [];
+                    allActivities.forEach(a => {
+                        if (a.category) {
+                            const cats = String(a.category).split(',').map(c => c.trim()).filter(Boolean);
+                            allCats.push(...cats);
+                        }
+                    });
+                    const categories = [...new Set(allCats)];
+                    
+                    // Icons for each category
+                    const categoryIcons = {
+                        'Beach Bonfire': '🔥',
+                        'Water Fun': '💦',
+                        'Farmers Market': '🥬',
+                        'Farmers Markets': '🥬',
+                        'Live Music': '🎵',
+                        'Shopping': '🛍️',
+                        'State Park': '🏞️',
+                        'Nature': '🌲',
+                        'Golf': '⛳',
+                        'Fitness & Wellness': '💪',
+                        'Rainy Day': '🌧️'
+                    };
+                    
+                    // Create pills - categories first, All last
+                    let pillsHtml = categories.map(cat => 
+                        `<button class="subcategory-pill" data-sub="${cat}" onclick="selectActivityCategory('${cat}')">${categoryIcons[cat] || '📍'} ${cat}</button>`
+                    ).join('');
+                    pillsHtml += `<button class="subcategory-pill" data-sub="all" onclick="selectActivityCategory('all')">All</button>`;
+                    
+                    pillsContainer.innerHTML = pillsHtml;
+                    container.innerHTML = '<div class="cards-loading">Select a category above</div>';
+                } else {
+                    pillsContainer.innerHTML = '<div class="cards-loading">No activities found</div>';
+                }
+            } catch (e) {
+                console.error('Activities error:', e);
+                pillsContainer.innerHTML = '<div class="cards-loading">Error loading activities</div>';
+            }
+        }
+        
+        async function selectActivityCategory(category) {
+            // Update pill states
+            document.querySelectorAll('#activities-pills .subcategory-pill').forEach(p => p.classList.remove('active'));
+            document.querySelector(`#activities-pills [data-sub="${category}"]`)?.classList.add('active');
+            
+            // Hide sub-pills by default
+            document.getElementById('activity-subpills').style.display = 'none';
+            
+            const container = document.getElementById('activities-cards');
+            const catLower = category.toLowerCase();
+            
+            if (catLower === 'beach bonfire') {
+                await loadBeachBonfire();
+            } else if (catLower === 'farmers market' || catLower === 'farmers markets') {
+                await loadFarmersMarket();
+            } else if (catLower === 'live music') {
+                await loadLiveMusic();
+            } else if (catLower === 'water fun') {
+                loadWaterFun();
+            } else if (catLower === 'shopping') {
+                await loadShopping();
+            } else if (catLower === 'state park') {
+                loadStatePark();
+            } else if (catLower === 'nature') {
+                loadNature();
+            } else if (catLower === 'golf') {
+                loadGolf();
+            } else if (catLower === 'fitness & wellness') {
+                await loadFitnessWellness();
+            } else if (catLower === 'rainy day') {
+                await loadRainyDay();
+            } else if (catLower === 'all') {
+                loadAllActivities();
+            } else {
+                container.innerHTML = '<div class="cards-loading">Select a category above</div>';
+            }
+        }
+        
+        // Beach Bonfire - show description card first, then vendors on tap
+        async function loadBeachBonfire() {
+            const container = document.getElementById('activities-cards');
+            
+            // Find the Beach Bonfire activity
+            const activity = allActivities.find(a => {
+                if (!a.category) return false;
+                const cats = String(a.category).split(',').map(c => c.trim().toLowerCase());
+                return cats.includes('beach bonfire');
+            });
+            
+            // Build description from description, best spots, and tips fields
+            let descParts = [];
+            if (activity?.description) descParts.push(activity.description);
+            if (activity?.best_spots || activity?.['best spots']) {
+                descParts.push(`<strong>Best Spots:</strong> ${activity.best_spots || activity['best spots']}`);
+            }
+            if (activity?.tips) {
+                descParts.push(`<strong>Tips:</strong> ${activity.tips}`);
+            }
+            
+            const fullDescription = descParts.length > 0 
+                ? descParts.join('<br><br>') 
+                : 'Experience a magical evening on the beach with a bonfire. Local vendors handle all the setup and cleanup.';
+            
+            container.innerHTML = `
+                <div class="card" onclick="showBonfireVendors()" style="cursor: pointer;">
+                    <div class="card-icon">🔥</div>
+                    <div class="card-content">
+                        <div class="card-title">${activity?.name || 'Beach Bonfires'}</div>
+                        <div class="card-meta">${fullDescription}</div>
+                        <div class="card-meta" style="color: #f4a261; margin-top: 4px;">Tap to see Vendors →</div>
+                    </div>
+                    <span class="card-arrow">›</span>
+                </div>`;
+        }
+        
+        async function showBonfireVendors() {
+            const container = document.getElementById('activities-cards');
+            container.innerHTML = '<div class="cards-loading">Loading vendors...</div>';
+            
+            try {
+                const response = await fetch(`/.netlify/functions/get-places?category=rentals&zone=all&subcategory=Bonfire`);
+                const data = await response.json();
+                if (data.success && data.places?.length) {
+                    const sorted = sortByZoneProximity(data.places);
+                    container.innerHTML = sorted.map(vendor => createRentalCard(vendor)).join('');
+                } else {
+                    container.innerHTML = '<div class="cards-loading">No bonfire vendors found</div>';
+                }
+            } catch (e) {
+                container.innerHTML = '<div class="cards-loading">Error loading vendors</div>';
+            }
+        }
+        
+        // Farmers Market - load from 30A Farmers Market table
+        async function loadFarmersMarket() {
+            const container = document.getElementById('activities-cards');
+            container.innerHTML = '<div class="cards-loading">Loading...</div>';
+            
+            try {
+                const response = await fetch(`/.netlify/functions/get-places?category=farmersmarket&zone=all`);
+                const data = await response.json();
+                console.log('Farmers Market response:', data);
+                
+                if (data.success && data.places?.length) {
+                    container.innerHTML = data.places.map(market => {
+                        const name = market.name || market.Name || 'Farmers Market';
+                        const desc = market.description || market.Description || '';
+                        const location = market.location || market.Location || '';
+                        const hours = market.hours || market.Hours || '';
+                        const url = market.website || market.Website || market.url || market.URL || '#';
+                        
+                        let metaText = '';
+                        if (location) metaText += location;
+                        if (hours) metaText += (metaText ? ' · ' : '') + hours;
+                        if (desc) metaText += (metaText ? '<br>' : '') + desc;
+                        
+                        return `
+                            <a href="${url}" target="_blank" class="card">
+                                <div class="card-icon">🥬</div>
+                                <div class="card-content">
+                                    <div class="card-title">${name}</div>
+                                    <div class="card-meta">${metaText || 'Click for more info'}</div>
+                                </div>
+                                <span class="card-arrow">›</span>
+                            </a>`;
+                    }).join('');
+                } else {
+                    container.innerHTML = '<div class="cards-loading">No farmers markets found</div>';
+                }
+            } catch (e) {
+                console.error('Farmers Market error:', e);
+                container.innerHTML = '<div class="cards-loading">Error loading</div>';
+            }
+        }
+        
+        // Live Music - go to 30A Restaurants Complete, live_music = "Yes"
+        async function loadLiveMusic() {
+            const container = document.getElementById('activities-cards');
+            container.innerHTML = '<div class="cards-loading">Loading...</div>';
+            
+            try {
+                const response = await fetch(`/.netlify/functions/get-places?category=restaurants&zone=all`);
+                const data = await response.json();
+                if (data.success && data.places?.length) {
+                    const liveMusic = data.places.filter(r => 
+                        r.live_music === 'Yes' || r.live_music === 'checked' || r.live_music === true
+                    );
+                    if (liveMusic.length) {
+                        const sorted = sortByZoneProximity(liveMusic);
+                        container.innerHTML = sorted.map(r => createDiningCard(r)).join('');
+                    } else {
+                        container.innerHTML = '<div class="cards-loading">No live music venues found</div>';
+                    }
+                } else {
+                    container.innerHTML = '<div class="cards-loading">No venues found</div>';
+                }
+            } catch (e) {
+                container.innerHTML = '<div class="cards-loading">Error loading</div>';
+            }
+        }
+        
+        // Water Fun - sub-pills from name column, then show description card, then vendors on tap
+        let rentalsLoaded = false;
+        
+        function loadWaterFun() {
+            const subpillsContainer = document.getElementById('activity-subpills');
+            const container = document.getElementById('activities-cards');
+            
+            // Get Water Fun activities (handle comma-separated categories)
+            const waterActivities = allActivities.filter(a => {
+                if (!a.category) return false;
+                const cats = String(a.category).split(',').map(c => c.trim().toLowerCase());
+                return cats.includes('water fun');
+            });
+            
+            // Create sub-pills from name column
+            let subpillsHtml = waterActivities.map(activity => 
+                `<button class="subcategory-pill small" data-sub="${activity.name}" onclick="loadWaterFunVendors('${activity.name}')">${activity.name}</button>`
+            ).join('');
+            subpillsContainer.innerHTML = subpillsHtml;
+            subpillsContainer.style.display = 'flex';
+            
+            container.innerHTML = '<div class="cards-loading">Select an activity above</div>';
+        }
+        
+        async function loadWaterFunVendors(activityName) {
+            document.querySelectorAll('#activity-subpills .subcategory-pill').forEach(p => p.classList.remove('active'));
+            document.querySelector(`#activity-subpills [data-sub="${activityName}"]`)?.classList.add('active');
+            
+            const container = document.getElementById('activities-cards');
+            container.innerHTML = '<div class="cards-loading">Loading...</div>';
+            
+            // Find the activity to get website if needed (for Crab Island, Scuba & Snorkel)
+            const waterActivities = allActivities.filter(a => {
+                if (!a.category) return false;
+                const cats = String(a.category).split(',').map(c => c.trim().toLowerCase());
+                return cats.includes('water fun');
+            });
+            const activity = waterActivities.find(a => a.name === activityName);
+            
+            // Map activity names to rental categories
+            const categoryMap = {
+                'boats & charters': 'Boats & Charters',
+                'paddleboarding': 'Paddleboards',
+                'kayaking': 'Kayaks',
+                'scuba & snorkel': 'Scuba & Snorkel'
+            };
+            
+            const nameLower = activityName.toLowerCase();
+            const rentalCategory = categoryMap[nameLower];
+            
+            // Special case: Crab Island - just show the website link card
+            if (nameLower === 'crab island') {
+                if (activity?.website) {
+                    container.innerHTML = `
+                        <a href="${activity.website}" target="_blank" class="card">
+                            <div class="card-icon">💦</div>
+                            <div class="card-content">
+                                <div class="card-title">${activity.name}</div>
+                                <div class="card-meta">${activity.description || 'Learn more about Crab Island'}</div>
+                                <div class="card-meta" style="color: #f4a261; margin-top: 4px;">Tap to see More →</div>
+                            </div>
+                            <span class="card-arrow">›</span>
+                        </a>`;
+                } else {
+                    container.innerHTML = '<div class="cards-loading">No info available for Crab Island</div>';
+                }
+                return;
+            }
+            
+            // Special case: Scuba & Snorkel - show description from Activities, then link to website on tap
+            if (nameLower === 'scuba & snorkel') {
+                const websiteUrl = activity?.website || '#';
+                const description = activity?.description || 'Explore underwater adventures in the 30A area';
+                
+                container.innerHTML = `
+                    <a href="${websiteUrl}" target="_blank" class="card">
+                        <div class="card-icon">🤿</div>
+                        <div class="card-content">
+                            <div class="card-title">Scuba & Snorkel</div>
+                            <div class="card-meta">${description}</div>
+                            <div class="card-meta" style="color: #f4a261; margin-top: 4px;">Tap for More →</div>
+                        </div>
+                        <span class="card-arrow">›</span>
+                    </a>`;
+                return;
+            }
+            
+            // For other water activities - load rentals and show description card first
+            if (rentalCategory) {
+                try {
+                    // Load all rentals if not already loaded
+                    if (!rentalsLoaded) {
+                        const response = await fetch(`/.netlify/functions/get-places?category=rentals&zone=all`);
+                        const data = await response.json();
+                        if (data.success && data.places?.length) {
+                            allRentals = data.places;
+                            rentalsLoaded = true;
+                        }
+                    }
+                    
+                    // Find rentals with this category to get the sub-category description
+                    const matchingRentals = allRentals.filter(r => r.category === rentalCategory);
+                    
+                    if (matchingRentals.length) {
+                        // Get the sub-category description (use first one found, deduplicated)
+                        const subCatDesc = matchingRentals[0]['sub-category description'] || 
+                                          matchingRentals[0]['sub-category_description'] ||
+                                          matchingRentals[0].subcategory_description ||
+                                          `Explore ${activityName} options in the area`;
+                        
+                        // Show description card with "Tap to see Rentals"
+                        container.innerHTML = `
+                            <div class="card" onclick="showWaterFunRentals('${rentalCategory}')" style="cursor: pointer;">
+                                <div class="card-icon">💦</div>
+                                <div class="card-content">
+                                    <div class="card-title">${activityName}</div>
+                                    <div class="card-meta">${subCatDesc}</div>
+                                    <div class="card-meta" style="color: #f4a261; margin-top: 4px;">Tap to see Rentals →</div>
+                                </div>
+                                <span class="card-arrow">›</span>
+                            </div>`;
+                    } else {
+                        container.innerHTML = `<div class="cards-loading">No ${activityName} vendors found</div>`;
+                    }
+                } catch (e) {
+                    console.error('Error loading rentals:', e);
+                    container.innerHTML = '<div class="cards-loading">Error loading</div>';
+                }
+            } else {
+                // No mapping found - show activity info if available
+                if (activity?.website) {
+                    container.innerHTML = `
+                        <a href="${activity.website}" target="_blank" class="card">
+                            <div class="card-icon">💦</div>
+                            <div class="card-content">
+                                <div class="card-title">${activity.name}</div>
+                                <div class="card-meta">${activity.description || 'Click to learn more'}</div>
+                                <div class="card-meta" style="color: #f4a261; margin-top: 4px;">Tap to see More →</div>
+                            </div>
+                            <span class="card-arrow">›</span>
+                        </a>`;
+                } else {
+                    container.innerHTML = `<div class="cards-loading">No info available for ${activityName}</div>`;
+                }
+            }
+        }
+        
+        function showWaterFunRentals(rentalCategory) {
+            const container = document.getElementById('activities-cards');
+            
+            // Filter rentals by category
+            const vendors = allRentals.filter(r => r.category === rentalCategory);
+            
+            if (vendors.length) {
+                const sorted = sortByZoneProximity(vendors);
+                container.innerHTML = sorted.map(vendor => createRentalCard(vendor)).join('');
+            } else {
+                container.innerHTML = '<div class="cards-loading">No vendors found</div>';
+            }
+        }
+        
+        // Shopping - go to 30A Shopping, type column for pills, create cards
+        let allShopping = [];
+        async function loadShopping() {
+            const subpillsContainer = document.getElementById('activity-subpills');
+            const container = document.getElementById('activities-cards');
+            container.innerHTML = '<div class="cards-loading">Loading...</div>';
+            
+            try {
+                const response = await fetch(`/.netlify/functions/get-places?category=shopping&zone=all`);
+                const data = await response.json();
+                console.log('Shopping response:', data);
+                
+                if (data.success && data.places?.length) {
+                    allShopping = data.places;
+                    
+                    // Get unique types for sub-pills (handle field name variations)
+                    const types = [...new Set(allShopping.map(s => s.type || s.Type).filter(Boolean))];
+                    
+                    let subpillsHtml = `<button class="subcategory-pill small active" data-sub="all-shopping" onclick="filterShopping('all')">All</button>`;
+                    subpillsHtml += types.map(type => 
+                        `<button class="subcategory-pill small" data-sub="${type}" onclick="filterShopping('${type}')">${type}</button>`
+                    ).join('');
+                    subpillsContainer.innerHTML = subpillsHtml;
+                    subpillsContainer.style.display = 'flex';
+                    
+                    renderShopping('all');
+                } else {
+                    container.innerHTML = '<div class="cards-loading">No shopping found</div>';
+                }
+            } catch (e) {
+                console.error('Shopping error:', e);
+                container.innerHTML = '<div class="cards-loading">Error loading</div>';
+            }
+        }
+        
+        function filterShopping(type) {
+            document.querySelectorAll('#activity-subpills .subcategory-pill').forEach(p => p.classList.remove('active'));
+            const selector = type === 'all' ? '#activity-subpills [data-sub="all-shopping"]' : `#activity-subpills [data-sub="${type}"]`;
+            document.querySelector(selector)?.classList.add('active');
+            renderShopping(type);
+        }
+        
+        function renderShopping(type) {
+            const container = document.getElementById('activities-cards');
+            const filtered = type === 'all' ? allShopping : allShopping.filter(s => (s.type || s.Type) === type);
+            
+            if (!filtered.length) {
+                container.innerHTML = '<div class="cards-loading">No shops found</div>';
+                return;
+            }
+            
+            container.innerHTML = filtered.map(shop => {
+                const name = shop.name || shop.Name || 'Unknown';
+                const shopType = shop.type || shop.Type || '';
+                const desc = shop.description || shop.Description || '';
+                const url = shop.website || shop.Website || shop.url || shop.URL || '#';
+                return `
+                <a href="${url}" target="_blank" class="card">
+                    <div class="card-icon">🛍️</div>
+                    <div class="card-content">
+                        <div class="card-title">${name}</div>
+                        <div class="card-meta">${shopType}${desc ? ' · ' + desc : ''}</div>
+                    </div>
+                    <span class="card-arrow">›</span>
+                </a>
+            `}).join('');
+        }
+        
+        // State Park - cards from name column, no zone filter
+        function loadStatePark() {
+            const container = document.getElementById('activities-cards');
+            const parks = allActivities.filter(a => {
+                if (!a.category) return false;
+                const cats = String(a.category).split(',').map(c => c.trim().toLowerCase());
+                return cats.includes('state park');
+            });
+            
+            if (!parks.length) {
+                container.innerHTML = '<div class="cards-loading">No state parks found</div>';
+                return;
+            }
+            
+            container.innerHTML = parks.map(park => `
+                <a href="${park.website || `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(park.name + ' FL')}`}" target="_blank" class="card">
+                    <div class="card-icon">🏞️</div>
+                    <div class="card-content">
+                        <div class="card-title">${park.name}</div>
+                        <div class="card-meta">${park.description || ''}</div>
+                    </div>
+                    <span class="card-arrow">›</span>
+                </a>
+            `).join('');
+        }
+        
+        // Nature - cards from name column, no zone filter
+        function loadNature() {
+            const container = document.getElementById('activities-cards');
+            const nature = allActivities.filter(a => {
+                if (!a.category) return false;
+                const cats = String(a.category).split(',').map(c => c.trim().toLowerCase());
+                return cats.includes('nature');
+            });
+            
+            if (!nature.length) {
+                container.innerHTML = '<div class="cards-loading">No nature spots found</div>';
+                return;
+            }
+            
+            container.innerHTML = nature.map(spot => `
+                <a href="${spot.website || `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(spot.name + ' FL')}`}" target="_blank" class="card">
+                    <div class="card-icon">🌲</div>
+                    <div class="card-content">
+                        <div class="card-title">${spot.name}</div>
+                        <div class="card-meta">${spot.description || ''}</div>
+                    </div>
+                    <span class="card-arrow">›</span>
+                </a>
+            `).join('');
+        }
+        
+        // Golf - show description card first, then open website on tap
+        function loadGolf() {
+            const container = document.getElementById('activities-cards');
+            
+            const activity = allActivities.find(a => {
+                if (!a.category) return false;
+                const cats = String(a.category).split(',').map(c => c.trim().toLowerCase());
+                return cats.includes('golf');
+            });
+            
+            const golfDescription = activity?.description || 'The 30A area offers world-class golf courses with stunning coastal views. From championship courses designed by legends like Tom Fazio to relaxed resort layouts, there\'s something for every skill level.';
+            const golfUrl = activity?.website || '#';
+            
+            container.innerHTML = `
+                <a href="${golfUrl}" target="_blank" class="card">
+                    <div class="card-icon">⛳</div>
+                    <div class="card-content">
+                        <div class="card-title">${activity?.name || 'Golf on 30A'}</div>
+                        <div class="card-meta">${golfDescription}</div>
+                        <div class="card-meta" style="color: #f4a261; margin-top: 4px;">Tap to see More →</div>
+                    </div>
+                    <span class="card-arrow">›</span>
+                </a>`;
+        }
+        
+        // Fitness & Wellness - show type pills from 30A Fitness and Wellness table, 
+        // initially show description card from Activities, when type clicked show name cards from table
+        let allFitness = [];
+        async function loadFitnessWellness() {
+            const subpillsContainer = document.getElementById('activity-subpills');
+            const container = document.getElementById('activities-cards');
+            container.innerHTML = '<div class="cards-loading">Loading...</div>';
+            
+            try {
+                const response = await fetch(`/.netlify/functions/get-places?category=fitness&zone=all`);
+                const data = await response.json();
+                console.log('Fitness response:', data);
+                
+                if (data.success && data.places?.length) {
+                    allFitness = data.places;
+                    
+                    // Get unique types for sub-pills
+                    const types = [...new Set(allFitness.map(f => f.type || f.Type).filter(Boolean))];
+                    
+                    const fitnessIcons = { 'yoga': '🧘', 'gym': '🏋️', 'pilates': '🤸', 'spa': '💆', 'wellness': '🌿' };
+                    
+                    // Create type pills (no "All" pill)
+                    let subpillsHtml = types.map(type => 
+                        `<button class="subcategory-pill small" data-sub="${type}" onclick="filterFitnessWellness('${type}')">${fitnessIcons[type.toLowerCase()] || '💪'} ${type}</button>`
+                    ).join('');
+                    subpillsContainer.innerHTML = subpillsHtml;
+                    subpillsContainer.style.display = 'flex';
+                    
+                    // Show description card from Activities table
+                    const fitnessActivity = allActivities.find(a => {
+                        if (!a.category) return false;
+                        const cats = String(a.category).split(',').map(c => c.trim().toLowerCase());
+                        return cats.includes('fitness & wellness');
+                    });
+                    
+                    if (fitnessActivity) {
+                        container.innerHTML = `
+                            <div class="card">
+                                <div class="card-icon">💪</div>
+                                <div class="card-content">
+                                    <div class="card-title">${fitnessActivity.name || 'Fitness & Wellness'}</div>
+                                    <div class="card-meta">${fitnessActivity.description || 'Select a category above to see options'}</div>
+                                </div>
+                            </div>`;
+                    } else {
+                        container.innerHTML = '<div class="cards-loading">Select a category above</div>';
+                    }
+                } else {
+                    container.innerHTML = '<div class="cards-loading">No fitness & wellness found</div>';
+                }
+            } catch (e) {
+                console.error('Fitness error:', e);
+                container.innerHTML = '<div class="cards-loading">Error loading</div>';
+            }
+        }
+        
+        function filterFitnessWellness(type) {
+            document.querySelectorAll('#activity-subpills .subcategory-pill').forEach(p => p.classList.remove('active'));
+            document.querySelector(`#activity-subpills [data-sub="${type}"]`)?.classList.add('active');
+            renderFitnessWellness(type);
+        }
+        
+        function renderFitnessWellness(type) {
+            const container = document.getElementById('activities-cards');
+            const filtered = allFitness.filter(f => (f.type || f.Type) === type);
+            
+            const fitnessIcons = { 'yoga': '🧘', 'gym': '🏋️', 'pilates': '🤸', 'spa': '💆', 'wellness': '🌿' };
+            
+            if (!filtered.length) {
+                container.innerHTML = '<div class="cards-loading">No places found</div>';
+                return;
+            }
+            
+            container.innerHTML = filtered.map(place => {
+                const name = place.name || place.Name || 'Unknown';
+                const pType = place.type || place.Type || '';
+                const desc = place.description || place.Description || place.address || place.Address || '';
+                const url = place.website || place.Website || place.url || place.URL || '#';
+                return `
+                <a href="${url}" target="_blank" class="card">
+                    <div class="card-icon">${fitnessIcons[pType.toLowerCase()] || '💪'}</div>
+                    <div class="card-content">
+                        <div class="card-title">${name}</div>
+                        <div class="card-meta">${desc}</div>
+                    </div>
+                    <span class="card-arrow">›</span>
+                </a>
+            `}).join('');
+        }
+        
+        // Rainy Day - show type pills from 30A Rainy Day table, then cards on selection
+        let allRainyDay = [];
+        async function loadRainyDay() {
+            const subpillsContainer = document.getElementById('activity-subpills');
+            const container = document.getElementById('activities-cards');
+            container.innerHTML = '<div class="cards-loading">Loading...</div>';
+            
+            try {
+                const response = await fetch(`/.netlify/functions/get-places?category=rainyday&zone=all`);
+                const data = await response.json();
+                
+                if (data.success && data.places?.length) {
+                    allRainyDay = data.places;
+                    
+                    // Get unique types for sub-pills
+                    const types = [...new Set(allRainyDay.map(r => r.type || r.Type).filter(Boolean))];
+                    
+                    // Create type pills (no "All" pill)
+                    let subpillsHtml = types.map(type => 
+                        `<button class="subcategory-pill small" data-sub="${type}" onclick="filterRainyDay('${type}')">${type}</button>`
+                    ).join('');
+                    subpillsContainer.innerHTML = subpillsHtml;
+                    subpillsContainer.style.display = 'flex';
+                    
+                    container.innerHTML = '<div class="cards-loading">Select an activity above</div>';
+                } else {
+                    container.innerHTML = '<div class="cards-loading">No rainy day activities found</div>';
+                }
+            } catch (e) {
+                container.innerHTML = '<div class="cards-loading">Error loading</div>';
+            }
+        }
+        
+        function filterRainyDay(type) {
+            document.querySelectorAll('#activity-subpills .subcategory-pill').forEach(p => p.classList.remove('active'));
+            document.querySelector(`#activity-subpills [data-sub="${type}"]`)?.classList.add('active');
+            renderRainyDay(type);
+        }
+        
+        function renderRainyDay(type) {
+            const container = document.getElementById('activities-cards');
+            const filtered = allRainyDay.filter(r => (r.type || r.Type) === type);
+            
+            if (!filtered.length) {
+                container.innerHTML = '<div class="cards-loading">No activities found</div>';
+                return;
+            }
+            
+            container.innerHTML = filtered.map(activity => {
+                const name = activity.name || activity.Name || 'Unknown';
+                const desc = activity.description || activity.Description || '';
+                const url = activity.website || activity.Website || activity.url || activity.URL || '#';
+                return `
+                <a href="${url}" target="_blank" class="card">
+                    <div class="card-icon">🌧️</div>
+                    <div class="card-content">
+                        <div class="card-title">${name}</div>
+                        <div class="card-meta">${desc}</div>
+                    </div>
+                    <span class="card-arrow">›</span>
+                </a>`;
+            }).join('');
+        }
+        
+        // All - show all activities
+        function loadAllActivities() {
+            const container = document.getElementById('activities-cards');
+            if (!allActivities.length) {
+                container.innerHTML = '<div class="cards-loading">No activities</div>';
+                return;
+            }
+            container.innerHTML = allActivities.map(a => createActivityCard(a)).join('');
+        }
+        
+        // Rentals
+        async function loadRentals() {
+            const pillsContainer = document.getElementById('rentals-pills');
+            const container = document.getElementById('rentals-cards');
+            
+            try {
+                const response = await fetch(`/.netlify/functions/get-places?category=rentals&zone=${propertyZone}`);
+                const data = await response.json();
+                console.log('Rentals response:', data);
+                if (data.success && data.places?.length) {
+                    allRentals = data.places;
+                    
+                    // Get unique categories for pills
+                    const categories = [...new Set(allRentals.map(r => r.category).filter(Boolean))];
+                    
+                    // Icons for each category
+                    const categoryIcons = {
+                        'Bike': '🚲',
+                        'Kayak': '🛶',
+                        'Kayaks': '🛶',
+                        'Paddleboard': '🏄',
+                        'Paddleboards': '🏄',
+                        'Golf Cart': '🛒',
+                        'Beach Chairs': '🏖️',
+                        'Bonfire': '🔥',
+                        'Boat Charter': '🚤',
+                        'Boats & Charters': '🚤',
+                        'Dolphin Cruise': '🐬',
+                        'Snorkle': '🤿',
+                        'Snorkel': '🤿',
+                        'Jet Ski': '🚤',
+                        'Fishing Charter': '🎣',
+                        'Parasail': '🪂'
+                    };
+                    
+                    // Create pills - All first, then categories
+                    let pillsHtml = `<button class="subcategory-pill active" data-sub="all" onclick="filterRentals('all')">All</button>`;
+                    pillsHtml += categories.map(cat => 
+                        `<button class="subcategory-pill" data-sub="${cat}" onclick="filterRentals('${cat}')">${categoryIcons[cat] || '📦'} ${cat}</button>`
+                    ).join('');
+                    
+                    pillsContainer.innerHTML = pillsHtml;
+                    renderRentals('all');
+                } else {
+                    pillsContainer.innerHTML = '';
+                    container.innerHTML = '<div class="cards-loading">No rentals found</div>';
+                }
+            } catch (e) {
+                console.error('Rentals error:', e);
+                pillsContainer.innerHTML = '';
+                container.innerHTML = '<div class="cards-loading">Error loading rentals</div>';
+            }
+        }
+        
+        function filterRentals(subcategory) {
+            document.querySelectorAll('#rentals-pills .subcategory-pill').forEach(p => p.classList.remove('active'));
+            document.querySelector(`#rentals-pills [data-sub="${subcategory}"]`)?.classList.add('active');
+            renderRentals(subcategory);
+        }
+        
+        function renderRentals(filter) {
+            const container = document.getElementById('rentals-cards');
+            const filtered = filter === 'all' ? allRentals : allRentals.filter(r => r.category === filter);
+            
+            if (!filtered.length) {
+                container.innerHTML = '<div class="cards-loading">No rentals in this category</div>';
+                return;
+            }
+            
+            // Show first 3, then "Show More"
+            const toShow = filtered.slice(0, 3);
+            const hasMore = filtered.length > 3;
+            let html = toShow.map(r => createRentalCard(r)).join('');
+            if (hasMore) {
+                html += `<button class="show-more-btn" onclick="renderAllRentals('${filter}')">Show ${filtered.length - 3} More Vendors</button>`;
+            }
+            container.innerHTML = html;
+        }
+        
+        function renderAllRentals(filter) {
+            const container = document.getElementById('rentals-cards');
+            const filtered = filter === 'all' ? allRentals : allRentals.filter(r => r.category === filter);
+            container.innerHTML = filtered.map(r => createRentalCard(r)).join('');
+        }
+        
+        // Beaches
+        function renderBeaches(count) {
+            const container = document.getElementById('beaches-cards');
+            const beachesToShow = allBeaches.slice(0, count);
+            const hasMore = allBeaches.length > count;
+            
+            let html = beachesToShow.map(p => createCard(p, 'beaches')).join('');
+            
+            if (hasMore) {
+                html += `<button class="show-more-btn" onclick="showAllBeaches()">Show All Beaches</button>`;
+            }
+            
+            container.innerHTML = html;
+            logImpressions(beachesToShow, 'beaches');
+        }
+        
+        function createActivityCard(activity) {
+            const categoryIcons = {
+                'Water Fun': '💦',
+                'Nature & Parks': '🌲',
+                'Experiences': '✨',
+                'Fitness & Wellness': '💪'
+            };
+            const icon = categoryIcons[activity.category] || '🎯';
+            
+            // Determine what happens when clicked
+            let link = '#';
+            let onclick = '';
+            let actionText = '';
+            
+            if (activity.type === 'link' && activity.website) {
+                link = activity.website.startsWith('http') ? activity.website : `https://${activity.website}`;
+                actionText = 'Visit →';
+            } else if (activity.type === 'vendors' && activity.rental_category) {
+                onclick = `onclick="showVendorsForActivity('${activity.rental_category}'); return false;"`;
+                actionText = 'See vendors →';
+            } else if (activity.type === 'restaurants') {
+                onclick = `onclick="showLiveMusicVenues(); return false;"`;
+                actionText = 'See venues →';
+            } else {
+                actionText = 'Learn more';
+            }
+            
+            const subtitle = activity.description ? 
+                (activity.description.length > 80 ? activity.description.substring(0,80)+'...' : activity.description) : '';
+            
+            return `<a href="${link}" ${onclick} class="card activity-card">
+                <div class="card-icon-circle">${icon}</div>
+                <div class="card-content">
+                    <div class="card-title">${activity.name || 'Unknown'}</div>
+                    <div class="card-subtitle">${subtitle}</div>
+                    ${activity.tips ? `<div class="card-meta">💡 ${activity.tips}</div>` : ''}
+                </div>
+                <span class="card-arrow">${actionText}</span>
+            </a>`;
+        }
+        
+        async function showLiveMusicVenues() {
+            // Switch to dining tab
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.category-content').forEach(c => c.classList.remove('active'));
+            
+            document.querySelector('[data-category="dining"]').classList.add('active');
+            document.getElementById('dining-content').classList.add('active');
+            
+            const container = document.getElementById('dining-cards');
+            
+            // If dining not loaded yet, load it first
+            if (container.dataset.loaded !== 'true') {
+                container.innerHTML = '<div class="cards-loading">Loading live music venues...</div>';
+                const response = await fetch(`/.netlify/functions/get-places?category=restaurants&zone=${propertyZone}`);
+                const data = await response.json();
+                if (data.success && data.places?.length) {
+                    allDining = data.places;
+                    container.dataset.loaded = 'true';
+                }
+            }
+            
+            // Reset all filters and activate only music
+            diningFilters = { cuisine: 'all', outdoor: false, pet: false, happy: false, music: true };
+            document.querySelectorAll('#dining-cuisine-pills .subcategory-pill').forEach(p => p.classList.remove('active'));
+            document.querySelector('#dining-cuisine-pills [data-cuisine="all"]').classList.add('active');
+            document.querySelectorAll('#dining-toggles .filter-toggle').forEach(t => t.classList.remove('active'));
+            document.querySelector('#dining-toggles [data-filter="music"]').classList.add('active');
+            
+            // Render filtered results
+            renderFilteredDining();
+            
+            document.getElementById('dining-content').scrollIntoView({behavior:'smooth',block:'nearest'});
+        }
+        
+        function createRentalCard(rental) {
+            const categoryIcons = {
+                'Bonfire': '🔥', 'Paddleboard': '🏄', 'Kayak': '🛶', 'Bike': '🚲',
+                'Golf Cart': '🛒', 'Boat Charter': '🚤', 'Fishing Charter': '🎣',
+                'Dolphin Cruise': '🐬', 'Sunset Cruise': '🌅', 'Photography': '📸',
+                'Shopping': '🛍️', 'Charcuterie': '🧀', 'Private Chef': '👨‍🍳',
+                'Beach Chairs': '🏖️'
+            };
+            const icon = categoryIcons[rental.category] || '📦';
+            
+            let link = rental.website ? 
+                (rental.website.startsWith('http') ? rental.website : `https://${rental.website}`) :
+                (rental.phone ? `tel:${rental.phone.replace(/\D/g,'')}` : '#');
+            
+            const subtitle = rental.services ? 
+                (rental.services.length > 70 ? rental.services.substring(0,70)+'...' : rental.services) : 
+                (rental.notes || '');
+            
+            const rentalName = (rental.name || 'Unknown').replace(/'/g, "\\'");
+            const rentalCat = (rental.category || 'rentals').replace(/'/g, "\\'");
+            
+            return `<a href="${link}" target="_blank" class="card rental-card" onclick="logEvent('card_click', '${rentalName}', '${rentalCat}')">
+                <div class="card-icon-circle">${icon}</div>
+                <div class="card-content">
+                    <div class="card-title">${rental.name || 'Unknown'}</div>
+                    <div class="card-subtitle">${subtitle}</div>
+                    <div class="card-meta">${rental.starting_price ? `💰 ${rental.starting_price}` : ''}${rental.phone ? ` · 📞 ${rental.phone}` : ''}</div>
+                </div>
+                <span class="card-arrow">›</span>
+            </a>`;
+        }
+        
+        function showVendorsForActivity(rentalCategory) {
+            // Switch to rentals tab and filter
+            document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.category-content').forEach(c => c.classList.remove('active'));
+            
+            document.querySelector('[data-category="rentals"]').classList.add('active');
+            document.getElementById('rentals-content').classList.add('active');
+            
+            // Load rentals if not loaded, then filter
+            const container = document.getElementById('rentals-cards');
+            if (container.dataset.loaded !== 'true') {
+                loadRentals().then(() => filterRentals(rentalCategory));
+            } else {
+                filterRentals(rentalCategory);
+            }
+            
+            document.getElementById('rentals-content').scrollIntoView({behavior:'smooth',block:'nearest'});
+        }
+
+        function createCard(place, category) {
+            const imgs = {
+                dining:'photo-1414235077428-338989a2e8c0',
+                grocery:'photo-1604719312566-8912e9227c6a',
+                pets:'photo-1587300003388-59208cc962cb',
+                beaches:'photo-1507525428034-b723cf961d3e'
+            };
+            
+            // Determine link
+            let link = place.map_link || place.website || 
+                       (place.address ? `https://maps.google.com/?q=${encodeURIComponent(place.address)}` : '#');
+            if (place.website && !place.website.startsWith('http')) link = `https://${place.website}`;
+            if (place.phone && !place.website && !place.map_link) link = `tel:${place.phone.replace(/\D/g,'')}`;
+            
+            // Build subtitle and meta based on category
+            let subtitle = place.description || place.cuisine || place.category || '';
+            let meta = '';
+            let badge = '';
+            
+            if (category === 'beaches') {
+                // Access type badge
+                const accessType = place.access_type || 'Public';
+                const badgeColor = accessType === 'Public' ? '#22c55e' : accessType === 'Private' ? '#ef4444' : '#f59e0b';
+                badge = `<span class="access-badge" style="background:${badgeColor}">${accessType}</span>`;
+                subtitle = place.description || '';
+                const parts = [];
+                if (place.lifeguards && place.lifeguards !== 'No') parts.push(`🏊 ${place.lifeguards}`);
+                if (place.parking) parts.push(place.parking);
+                meta = parts.join(' · ');
+            } else if (category === 'pets') {
+                subtitle = place.description ? (place.description.length > 60 ? place.description.substring(0,60)+'...' : place.description) : (place.category || '');
+                const parts = [];
+                if (place.off_leash === 'Yes') parts.push('🐕 Off-leash');
+                if (place.cost) parts.push(place.cost);
+                if (place.area) parts.push(place.area);
+                meta = parts.join(' · ');
+            } else {
+                meta = place.area || place.starting_price || '';
+            }
+            
+            const placeName = (place.name || 'Unknown').replace(/'/g, "\\'");
+            
+            return `<a href="${link}" target="_blank" class="card" onclick="logEvent('card_click', '${placeName}', '${category}')">
+                <img src="https://images.unsplash.com/${imgs[category]}?w=200&h=200&fit=crop" class="card-image">
+                <div class="card-content">
+                    <div class="card-title">${badge}${place.name||'Unknown'}</div>
+                    <div class="card-subtitle">${subtitle}</div>
+                    ${meta?`<div class="card-meta">📍 ${meta}</div>`:''}
+                </div>
+                <span class="card-arrow">›</span>
+            </a>`;
+        }
+
+        function populateBeaches() {
+            // Now handled dynamically via loadCategoryContent
+            // This is kept for backwards compatibility but does nothing
+        }
+
+        function copyPassword() {
+            if (!wifiPassword) return;
+            navigator.clipboard.writeText(wifiPassword);
+            const btn = document.querySelector('.copy-btn');
+            btn.textContent = 'Copied!'; btn.classList.add('copied');
+            setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+            logEvent('quick_access', 'WiFi Copy', 'property_info');
+        }
+
+        function openModal(id) { 
+            document.getElementById(id).classList.add('active'); 
+            document.body.style.overflow = 'hidden'; 
+            logEvent('modal_open', id, 'navigation');
+        }
+        function closeModal(id, e) { if (e && e.target !== e.currentTarget) return; document.getElementById(id).classList.remove('active'); document.body.style.overflow = ''; }
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.active').forEach(m => { m.classList.remove('active'); document.body.style.overflow = ''; }); });
+        
+        // Track directions click
+        document.addEventListener('DOMContentLoaded', () => {
+            const directionsLink = document.getElementById('directionsLink');
+            if (directionsLink) {
+                directionsLink.addEventListener('click', () => {
+                    logEvent('quick_access', 'Getting Here', 'property_info');
+                });
+            }
+        });
+
+        // Vapi integration
+        let vapiInstance = null;
+        let callActive = false;
+        
+        async function talkToLucy() {
+            console.log('talkToLucy called');
+            const heroBtn = document.querySelector('.talk-btn');
+            const floatingBtn = document.querySelector('.floating-lucy');
+            
+            if (!vapiInstance) {
+                console.log('Loading Vapi SDK...');
+                if (heroBtn) heroBtn.innerHTML = '<span>⏳</span> Loading...';
+                if (floatingBtn) floatingBtn.innerHTML = '<span>⏳</span> Loading...';
+                
+                try {
+                    // Use dynamic ES module import
+                    const module = await import('https://cdn.jsdelivr.net/npm/@vapi-ai/web@2.2.5/+esm');
+                    console.log('Vapi module loaded:', module);
+                    const VapiClass = module.default.default || module.default;
+                    console.log('VapiClass:', VapiClass);
+                    
+                    vapiInstance = new VapiClass('b5392a70-445c-4f3e-ba04-f5d9e8654063');
+                    console.log('Vapi instance created');
+                    
+                    vapiInstance.on('call-start', () => {
+                        console.log('Call started');
+                        callActive = true;
+                        updateAllButtons('active');
+                        logEvent('voice_call', 'started', 'voice');
+                    });
+                    
+                    vapiInstance.on('call-end', () => {
+                        logEvent('voice_call', 'ended', 'voice');
+                        console.log('Call ended');
+                        callActive = false;
+                        updateAllButtons('idle');
+                    });
+                    
+                    vapiInstance.on('error', (e) => {
+                        console.error('Vapi error:', e);
+                        callActive = false;
+                        updateAllButtons('idle');
+                    });
+                    
+                    startCall();
+                } catch (e) {
+                    console.error('Failed to load Vapi:', e);
+                    updateAllButtons('error');
+                    setTimeout(() => updateAllButtons('idle'), 2000);
+                }
+                return;
+            }
+            
+            if (callActive) {
+                endCall();
+            } else {
+                startCall();
+            }
+        }
+        
+        function initAndStartCall() {
+            // No longer needed - handled in talkToLucy
+        }
+        
+        function startCall() {
+            console.log('Starting call with assistant for property:', slug);
+            updateAllButtons('connecting');
+            try {
+                vapiInstance.start('cdab0107-f7af-4f5e-a0d0-66284c1ba287', {
+                    variableValues: {
+                        propertySlug: slug
+                    }
+                });
+            } catch (e) {
+                console.error('Start call error:', e);
+                updateAllButtons('idle');
+            }
+        }
+        
+        function endCall() {
+            try {
+                vapiInstance.stop();
+            } catch (e) {
+                console.error('End call error:', e);
+            }
+            callActive = false;
+            updateAllButtons('idle');
+        }
+        
+        function updateAllButtons(state) {
+            const heroBtn = document.querySelector('.talk-btn');
+            const floatingBtn = document.querySelector('.floating-lucy');
+            
+            if (state === 'active') {
+                if (heroBtn) {
+                    heroBtn.innerHTML = '<span>🔴</span> End Call<span class="talk-btn-sub">Tap to stop</span>';
+                    heroBtn.style.background = '#ef4444';
+                    heroBtn.style.color = 'white';
+                }
+                if (floatingBtn) {
+                    floatingBtn.innerHTML = '<span>🔴</span> End Call';
+                    floatingBtn.style.background = '#ef4444';
+                }
+            } else if (state === 'connecting') {
+                if (heroBtn) heroBtn.innerHTML = '<span>📞</span> Connecting...<span class="talk-btn-sub">Please wait</span>';
+                if (floatingBtn) floatingBtn.innerHTML = '<span>📞</span> Connecting...';
+            } else if (state === 'error') {
+                if (heroBtn) heroBtn.innerHTML = '<span>❌</span> Error<span class="talk-btn-sub">Try again</span>';
+                if (floatingBtn) floatingBtn.innerHTML = '<span>❌</span> Error';
+            } else {
+                // idle state
+                if (heroBtn) {
+                    heroBtn.innerHTML = '<span>🎙️</span> Talk to Lucy<span class="talk-btn-sub">Tap to start</span>';
+                    heroBtn.style.background = '';
+                    heroBtn.style.color = '';
+                }
+                if (floatingBtn) {
+                    floatingBtn.innerHTML = '<span>🎙️</span> Talk to Lucy';
+                    floatingBtn.style.background = '';
+                }
+            }
+        }
+    </script>
+</body>
+</html>
+<!-- v3 - Dynamic property modal - auto-displays all fields with data - Sat Jan 25 2025 -->
