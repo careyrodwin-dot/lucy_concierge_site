@@ -1,0 +1,13 @@
+/westgate-3602b    /Westgate/index.html    200
+/westgate-3602b/   /Westgate/index.html    200
+
+# Netlify redirects for Lucy Concierge
+
+# Keep Netlify functions working
+/.netlify/*  /.netlify/:splat  200
+
+# Keep the landing page at root
+/            /index.html       200
+
+# Route all other paths to the property page template
+/*           /hookweimsinker/index.html  200

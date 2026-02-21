@@ -1,0 +1,76 @@
+# Netlify configuration for Lucy Concierge
+
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+# PROPERTY PAGES - serve from subfolders
+[[redirects]]
+  from = "/hookweimsinker"
+  to = "/hookweimsinker/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/hookweimsinker/"
+  to = "/hookweimsinker/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/serenity"
+  to = "/serenity/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/serenity/"
+  to = "/serenity/index.html"
+  status = 200
+
+# STATIC PAGES - serve directly
+[[redirects]]
+  from = "/analytics.html"
+  to = "/analytics.html"
+  status = 200
+
+[[redirects]]
+  from = "/privacy.html"
+  to = "/privacy.html"
+  status = 200
+
+[[redirects]]
+  from = "/terms.html"
+  to = "/terms.html"
+  status = 200
+
+# Redirect old analytics pages to new combined page
+[[redirects]]
+  from = "/analytics-dashboard.html"
+  to = "/analytics.html"
+  status = 301
+
+[[redirects]]
+  from = "/monthly-report.html"
+  to = "/analytics.html?view=report"
+  status = 301
+
+# ROOT - serve landing page
+[[redirects]]
+  from = "/"
+  to = "/index.html"
+  status = 200
+
+# Headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "/netlify/functions/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Headers = "Content-Type"
+    Access-Control-Allow-Methods = "GET, POST, OPTIONS"
+
+[functions."update-beach-flags"]
+  schedule = "5 14,18 * * *"

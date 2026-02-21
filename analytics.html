@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucy Analytics</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #1B3A4B;
+            --navy-light: #2D4F5F;
+            --coral: #E8927C;
+            --white: #FFFFFF;
+            --gray-light: #94A3B8;
+            --green: #22c55e;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: linear-gradient(135deg, var(--navy) 0%, #0f2634 100%);
+            min-height: 100vh;
+            color: var(--white);
+            padding: 1rem;
+        }
+        
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        header {
+            text-align: center;
+            padding: 1.5rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 1.5rem;
+        }
+        
+        h1 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .subtitle { color: var(--gray-light); font-size: 0.9rem; }
+        
+        /* View Toggle */
+        .view-toggle { display: flex; justify-content: center; gap: 0; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .view-btn {
+            padding: 0.75rem 1.25rem;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: transparent;
+            color: var(--gray-light);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .view-btn:first-child { border-radius: 8px 0 0 8px; }
+        .view-btn:last-child { border-radius: 0 8px 8px 0; }
+        .view-btn:not(:first-child):not(:last-child) { border-left: none; }
+        .view-btn.active { background: var(--coral); border-color: var(--coral); color: var(--white); }
+        .view-btn:hover:not(.active) { border-color: var(--coral); color: var(--white); }
+        
+        /* Filters */
+        .filters {
+            display: flex; gap: 1rem; flex-wrap: wrap;
+            margin-bottom: 1.5rem; justify-content: center; align-items: flex-end;
+        }
+        .filter-group { display: flex; flex-direction: column; gap: 0.25rem; }
+        .filter-group label { font-size: 0.7rem; color: var(--gray-light); text-transform: uppercase; }
+        select, input[type="date"] {
+            padding: 0.6rem 0.9rem; border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: var(--navy-light); color: var(--white);
+            font-size: 0.85rem; min-width: 140px;
+        }
+        .btn {
+            padding: 0.6rem 1.25rem; border-radius: 8px; border: none;
+            background: var(--coral); color: var(--white);
+            font-weight: 600; font-size: 0.85rem; cursor: pointer;
+        }
+        .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(232,146,124,0.4); }
+        .btn-secondary { background: var(--navy-light); border: 1px solid rgba(255,255,255,0.2); }
+        
+        /* Tooltip */
+        .tooltip-wrapper { position: relative; display: inline-flex; align-items: center; gap: 0.35rem; }
+        .tooltip-icon {
+            width: 16px; height: 16px; border-radius: 50%;
+            background: rgba(255,255,255,0.15); color: var(--gray-light);
+            font-size: 0.65rem; font-weight: 600;
+            display: inline-flex; align-items: center; justify-content: center;
+            cursor: help; flex-shrink: 0;
+        }
+        .tooltip-icon:hover { background: var(--coral); color: var(--white); }
+        .tooltip-text {
+            visibility: hidden; opacity: 0; position: absolute;
+            bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%);
+            background: #1a1a2e; color: var(--white);
+            padding: 0.75rem 1rem; border-radius: 8px;
+            font-size: 0.75rem; font-weight: 400; line-height: 1.4;
+            width: 220px; text-align: left; z-index: 100;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .tooltip-text::after {
+            content: ''; position: absolute; top: 100%; left: 50%;
+            transform: translateX(-50%); border: 6px solid transparent;
+            border-top-color: #1a1a2e;
+        }
+        .tooltip-wrapper:hover .tooltip-text { visibility: visible; opacity: 1; }
+        
+        /* Metrics Grid */
+        .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .metric-card { background: var(--navy-light); border-radius: 12px; padding: 1.25rem; text-align: center; }
+        .metric-value { font-size: 2.25rem; font-weight: 700; color: var(--coral); margin-bottom: 0.25rem; }
+        .metric-label { font-size: 0.8rem; color: var(--gray-light); display: flex; align-items: center; justify-content: center; gap: 0.35rem; }
+        .metric-card.highlight { background: linear-gradient(135deg, var(--coral) 0%, #d97c5e 100%); }
+        .metric-card.highlight .metric-value { color: var(--white); }
+        .metric-card.highlight .metric-label { color: rgba(255,255,255,0.9); }
+        .metric-card.highlight .tooltip-icon { background: rgba(255,255,255,0.25); color: rgba(255,255,255,0.9); }
+        
+        /* Section */
+        .section { background: var(--navy-light); border-radius: 12px; padding: 1.25rem; margin-bottom: 1.25rem; }
+        .section h2 { font-size: 1rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+        .section h3 { font-size: 0.9rem; margin: 1rem 0 0.75rem; color: var(--coral); }
+        
+        /* Chart */
+        .chart-container { height: 180px; display: flex; align-items: flex-end; gap: 3px; padding: 1rem 0; }
+        .bar { flex: 1; background: var(--coral); border-radius: 3px 3px 0 0; min-height: 3px; position: relative; }
+        .bar:hover { background: var(--white); }
+        .bar-label { position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%); font-size: 0.6rem; color: var(--gray-light); }
+        .bar-value { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); font-size: 0.65rem; color: var(--white); opacity: 0; }
+        .bar:hover .bar-value { opacity: 1; }
+        
+        /* Lists */
+        .list { list-style: none; }
+        .list li { display: flex; justify-content: space-between; padding: 0.6rem 0; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 0.9rem; }
+        .list li:last-child { border-bottom: none; }
+        .list-name { font-weight: 500; }
+        .list-value { color: var(--coral); font-weight: 600; }
+        
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+        .three-col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+        @media (max-width: 900px) { .three-col { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 600px) { .two-col, .three-col { grid-template-columns: 1fr; } }
+        
+        /* Category Cards */
+        .category-card { background: rgba(255,255,255,0.05); border-radius: 10px; padding: 1rem; }
+        .category-card h4 { font-size: 0.85rem; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+        .category-card .mini-list { font-size: 0.8rem; }
+        .category-card .mini-list li { padding: 0.4rem 0; }
+        .view-full-link { font-size: 0.75rem; color: var(--coral); text-decoration: none; display: block; margin-top: 0.5rem; }
+        .view-full-link:hover { text-decoration: underline; }
+        
+        /* Report Styles */
+        .summary-banner {
+            background: linear-gradient(135deg, var(--coral) 0%, #d97c5e 100%);
+            border-radius: 16px; padding: 2rem; text-align: center; margin-bottom: 1.5rem;
+        }
+        .summary-headline { font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .summary-subtext { font-size: 1rem; opacity: 0.9; }
+        
+        .property-report { background: var(--navy-light); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.25rem; page-break-inside: avoid; }
+        .property-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .property-name { font-size: 1.15rem; font-weight: 600; }
+        .property-month { color: var(--gray-light); font-size: 0.85rem; }
+        
+        .stats-grid-report { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 1.25rem; }
+        .stat-box { background: rgba(255,255,255,0.05); border-radius: 10px; padding: 1rem; text-align: center; }
+        .stat-box .stat-value { font-size: 1.75rem; font-weight: 700; color: var(--coral); margin-bottom: 0.2rem; }
+        .stat-box .stat-label { font-size: 0.7rem; color: var(--gray-light); display: flex; align-items: center; justify-content: center; gap: 0.25rem; }
+        .highlight-stat .stat-value { color: var(--white); }
+        .highlight-stat { background: var(--coral); }
+        .highlight-stat .tooltip-icon { background: rgba(255,255,255,0.25); color: rgba(255,255,255,0.9); }
+        
+        .value-statement {
+            background: rgba(34,197,94,0.15); border: 1px solid rgba(34,197,94,0.3);
+            border-radius: 10px; padding: 1rem; text-align: center; margin-top: 1rem;
+        }
+        .value-statement strong { color: #22c55e; font-size: 1.1rem; }
+        .value-statement small { display: block; margin-top: 0.35rem; color: var(--gray-light); font-size: 0.75rem; }
+        
+        /* Category Report Table */
+        .category-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        .category-table th { text-align: left; padding: 0.75rem; border-bottom: 2px solid rgba(255,255,255,0.2); color: var(--gray-light); font-weight: 600; }
+        .category-table td { padding: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .category-table tr:hover { background: rgba(255,255,255,0.05); }
+        .category-table .ctr-good { color: var(--green); }
+        .category-table .ctr-ok { color: #f59e0b; }
+        .category-table .ctr-low { color: var(--gray-light); }
+        
+        .category-summary { display: flex; gap: 2rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+        .category-summary-item { text-align: center; }
+        .category-summary-value { font-size: 1.75rem; font-weight: 700; color: var(--coral); }
+        .category-summary-label { font-size: 0.75rem; color: var(--gray-light); }
+        
+        /* Loading & Empty */
+        .loading, .empty-state { text-align: center; padding: 3rem; color: var(--gray-light); }
+        .spinner { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--coral); border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .empty-state h2 { color: var(--white); margin-bottom: 0.5rem; }
+        
+        .view-container { display: none; }
+        .view-container.active { display: block; }
+        
+        /* Print */
+        @media print {
+            body { background: white; color: #1a1a1a; padding: 0; }
+            .view-toggle, .filters, .btn, header { display: none !important; }
+            .property-report, .section { background: #f8f8f8; border: 1px solid #ddd; }
+            .stat-box, .metric-card { border: 1px solid #ddd; }
+            .stat-value, .metric-value, .list-value { color: var(--coral) !important; }
+            .summary-banner { background: var(--coral) !important; color: white !important; -webkit-print-color-adjust: exact; }
+            .tooltip-icon { display: none; }
+        }
+        
+        @media (max-width: 600px) {
+            .filters { flex-direction: column; align-items: stretch; }
+            .filter-group { width: 100%; }
+            select, input[type="date"], .btn { width: 100%; }
+            .stats-grid-report { grid-template-columns: repeat(2, 1fr); }
+            .view-toggle { width: 100%; }
+            .view-btn { flex: 1; font-size: 0.75rem; padding: 0.6rem 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔔 Lucy Analytics</h1>
+            <p class="subtitle">Track guest interactions and measure value</p>
+        </header>
+        
+        <div class="view-toggle">
+            <button class="view-btn active" onclick="switchView('dashboard', this)">📊 Dashboard</button>
+            <button class="view-btn" onclick="switchView('report', this)">📄 PM Report</button>
+            <button class="view-btn" onclick="switchView('category', this)">📈 Business Report</button>
+        </div>
+        
+        <!-- Dashboard Filters -->
+        <div class="filters" id="dashboardFilters">
+            <div class="filter-group">
+                <label>Property</label>
+                <select id="propertyFilter"><option value="all">All Properties</option></select>
+            </div>
+            <div class="filter-group">
+                <label>Start Date</label>
+                <input type="date" id="startDate">
+            </div>
+            <div class="filter-group">
+                <label>End Date</label>
+                <input type="date" id="endDate">
+            </div>
+            <button class="btn" onclick="loadDashboard()">Apply</button>
+            <button class="btn btn-secondary" onclick="exportCSV()">📥 Export</button>
+        </div>
+        
+        <!-- Report Filters -->
+        <div class="filters" id="reportFilters" style="display: none;">
+            <div class="filter-group">
+                <label>Month</label>
+                <select id="monthFilter"></select>
+            </div>
+            <div class="filter-group">
+                <label>Property</label>
+                <select id="propertyFilterReport"><option value="all">All Properties</option></select>
+            </div>
+            <button class="btn" onclick="loadReport()">Generate</button>
+            <button class="btn btn-secondary" onclick="window.print()">🖨️ Print</button>
+        </div>
+        
+        <!-- Category Filters -->
+        <div class="filters" id="categoryFilters" style="display: none;">
+            <div class="filter-group">
+                <label>Category</label>
+                <select id="categorySelect">
+                    <option value="all">All Categories</option>
+                    <option value="dining">🍽️ Dining</option>
+                    <option value="beaches">🏖️ Beaches</option>
+                    <option value="grocery">🛒 Grocery</option>
+                    <option value="pets">🐕 Pets</option>
+                    <option value="rentals">🎯 Rentals</option>
+                    <option value="activities">🎭 Activities</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Start Date</label>
+                <input type="date" id="catStartDate">
+            </div>
+            <div class="filter-group">
+                <label>End Date</label>
+                <input type="date" id="catEndDate">
+            </div>
+            <button class="btn" onclick="loadCategoryReport()">Generate</button>
+            <button class="btn btn-secondary" onclick="exportCategoryCSV()">📥 Export</button>
+        </div>
+        
+        <!-- Dashboard View -->
+        <div class="view-container active" id="dashboardView">
+            <div id="dashboard"><div class="loading"><div class="spinner"></div><p>Loading analytics...</p></div></div>
+        </div>
+        
+        <!-- Report View -->
+        <div class="view-container" id="reportView">
+            <div id="report"><div class="loading"><div class="spinner"></div><p>Loading report...</p></div></div>
+        </div>
+        
+        <!-- Category View -->
+        <div class="view-container" id="categoryView">
+            <div id="categoryReport"><div class="loading"><div class="spinner"></div><p>Loading business report...</p></div></div>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlProperty = urlParams.get('property');
+        const urlView = urlParams.get('view');
+        
+        const today = new Date();
+        const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+        document.getElementById('endDate').value = today.toISOString().split('T')[0];
+        document.getElementById('startDate').value = thirtyDaysAgo.toISOString().split('T')[0];
+        document.getElementById('catEndDate').value = today.toISOString().split('T')[0];
+        document.getElementById('catStartDate').value = thirtyDaysAgo.toISOString().split('T')[0];
+        
+        const monthFilter = document.getElementById('monthFilter');
+        for (let i = 0; i < 12; i++) {
+            const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
+            const value = date.toISOString().substring(0, 7);
+            const label = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            monthFilter.innerHTML += `<option value="${value}">${label}</option>`;
+        }
+        
+        if (urlProperty && urlProperty !== 'all') {
+            ['propertyFilter', 'propertyFilterReport'].forEach(id => {
+                const select = document.getElementById(id);
+                const option = document.createElement('option');
+                option.value = urlProperty;
+                option.textContent = urlProperty;
+                option.selected = true;
+                select.appendChild(option);
+            });
+        }
+        
+        let currentData = null;
+        let currentCategoryData = null;
+        
+        const tooltips = {
+            hours_saved: 'Estimated time saved for property managers. Each guest interaction saves ~5 minutes of PM time. Formula: Total Interactions × 5 min ÷ 60.',
+            questions_answered: 'Total guest interactions including card clicks, voice calls, and quick access usage.',
+            voice_calls: 'Number of voice conversations guests had with Lucy.',
+            unique_sessions: 'Distinct guest sessions. A new session starts after 30 minutes of inactivity.',
+            app_opens: 'Number of times guests opened the Lucy app.',
+            card_clicks: 'Number of times guests clicked on business recommendation cards.',
+            peak_hours: 'Shows when guests are most active throughout the day.',
+            top_recommendations: 'Most clicked businesses across all categories.',
+            categories: 'Breakdown of interactions by category type.',
+            value_created: 'Estimated dollar value based on $15 per guest inquiry handled (industry average cost of a PM answering a guest call).',
+            impressions: 'Number of times this business was shown to guests when they viewed the category.',
+            clicks: 'Number of times guests clicked on this business to get more info.',
+            ctr: 'Click-through rate: Clicks ÷ Impressions × 100. Higher CTR means guests find this business more interesting.'
+        };
+        
+        function tooltip(key) {
+            return `<span class="tooltip-wrapper"><span class="tooltip-icon">?</span><span class="tooltip-text">${tooltips[key]}</span></span>`;
+        }
+        
+        function switchView(view, btn) {
+            document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            document.getElementById('dashboardView').classList.toggle('active', view === 'dashboard');
+            document.getElementById('reportView').classList.toggle('active', view === 'report');
+            document.getElementById('categoryView').classList.toggle('active', view === 'category');
+            
+            document.getElementById('dashboardFilters').style.display = view === 'dashboard' ? 'flex' : 'none';
+            document.getElementById('reportFilters').style.display = view === 'report' ? 'flex' : 'none';
+            document.getElementById('categoryFilters').style.display = view === 'category' ? 'flex' : 'none';
+            
+            if (view === 'dashboard') loadDashboard();
+            else if (view === 'report') loadReport();
+            else if (view === 'category') loadCategoryReport();
+        }
+        
+        async function loadDashboard() {
+            const dashboard = document.getElementById('dashboard');
+            dashboard.innerHTML = `<div class="loading"><div class="spinner"></div><p>Loading analytics...</p></div>`;
+            
+            const property = document.getElementById('propertyFilter').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            try {
+                const params = new URLSearchParams({ property_slug: property, start_date: startDate, end_date: endDate, report_type: 'summary' });
+                const response = await fetch(`/.netlify/functions/get-analytics?${params}`);
+                const data = await response.json();
+                
+                if (!data.success) throw new Error(data.error || 'Failed to load data');
+                currentData = data;
+                
+                if (data.record_count === 0) {
+                    dashboard.innerHTML = `<div class="empty-state"><h2>📊 No Data Yet</h2><p>Analytics will appear here once guests start using Lucy.</p></div>`;
+                    return;
+                }
+                
+                renderDashboard(data.summary);
+                populatePropertyFilter(data.summary.by_property, 'propertyFilter');
+            } catch (e) {
+                console.error('Dashboard error:', e);
+                dashboard.innerHTML = `<div class="empty-state"><h2>⚠️ Error Loading Data</h2><p>${e.message}</p></div>`;
+            }
+        }
+        
+        function renderDashboard(stats) {
+            const dashboard = document.getElementById('dashboard');
+            
+            const hours = Array.from({length: 24}, (_, i) => i);
+            const maxHourValue = Math.max(...Object.values(stats.peak_hours || {}), 1);
+            const hoursChart = hours.map(h => {
+                const value = stats.peak_hours?.[h] || 0;
+                const height = (value / maxHourValue) * 100;
+                const label = h === 0 ? '12a' : h < 12 ? `${h}a` : h === 12 ? '12p' : `${h-12}p`;
+                return `<div class="bar" style="height: ${Math.max(height, 2)}%"><span class="bar-value">${value}</span><span class="bar-label">${label}</span></div>`;
+            }).join('');
+            
+            const categoryIcons = { dining: '🍽️', beaches: '🏖️', grocery: '🛒', pets: '🐕', rentals: '🎯', activities: '🎭', navigation: '📍', other: '📋' };
+            
+            // Build category cards with top 3 each
+            const topByCategory = stats.top_by_category || {};
+            let categoryCardsHtml = '';
+            for (const [cat, items] of Object.entries(topByCategory)) {
+                if (items.length === 0) continue;
+                const icon = categoryIcons[cat] || '📋';
+                const listItems = items.slice(0, 3).map(([name, clicks]) => 
+                    `<li><span class="list-name">${name}</span><span class="list-value">${clicks}</span></li>`
+                ).join('');
+                categoryCardsHtml += `
+                    <div class="category-card">
+                        <h4>${icon} ${cat.charAt(0).toUpperCase() + cat.slice(1)}</h4>
+                        <ul class="list mini-list">${listItems}</ul>
+                        <a href="#" class="view-full-link" onclick="showCategoryDetail('${cat}'); return false;">View full report →</a>
+                    </div>`;
+            }
+            
+            const categories = Object.entries(stats.by_category || {})
+                .filter(([cat]) => cat !== 'unknown')
+                .sort((a, b) => b[1] - a[1])
+                .map(([cat, count]) => `<li><span class="list-name">${cat}</span><span class="list-value">${count}</span></li>`)
+                .join('') || '<li>No data yet</li>';
+            
+            dashboard.innerHTML = `
+                <div class="metrics-grid">
+                    <div class="metric-card highlight">
+                        <div class="metric-value">${stats.time_saved_hours || 0}</div>
+                        <div class="metric-label">Hours Saved ${tooltip('hours_saved')}</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${stats.questions_answered || 0}</div>
+                        <div class="metric-label">Questions Answered ${tooltip('questions_answered')}</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${stats.voice_calls || 0}</div>
+                        <div class="metric-label">Voice Calls ${tooltip('voice_calls')}</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${stats.unique_sessions || 0}</div>
+                        <div class="metric-label">Unique Sessions ${tooltip('unique_sessions')}</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${stats.app_opens || 0}</div>
+                        <div class="metric-label">App Opens ${tooltip('app_opens')}</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value">${stats.card_clicks || 0}</div>
+                        <div class="metric-label">Recommendations ${tooltip('card_clicks')}</div>
+                    </div>
+                </div>
+                
+                <div class="section">
+                    <h2>📈 Activity by Hour ${tooltip('peak_hours')}</h2>
+                    <div class="chart-container">${hoursChart}</div>
+                </div>
+                
+                <div class="section">
+                    <h2>🏆 Top Recommendations by Category ${tooltip('top_recommendations')}</h2>
+                    <div class="three-col">${categoryCardsHtml || '<p>No recommendation data yet</p>'}</div>
+                </div>
+                
+                <div class="section">
+                    <h2>📂 Interactions by Category ${tooltip('categories')}</h2>
+                    <ul class="list">${categories}</ul>
+                </div>
+            `;
+        }
+        
+        function showCategoryDetail(cat) {
+            document.getElementById('categorySelect').value = cat;
+            document.querySelector('.view-btn:nth-child(3)').click();
+        }
+        
+        async function loadReport() {
+            const report = document.getElementById('report');
+            report.innerHTML = `<div class="loading"><div class="spinner"></div><p>Loading report...</p></div>`;
+            
+            const month = document.getElementById('monthFilter').value;
+            const property = document.getElementById('propertyFilterReport').value;
+            
+            const startDate = `${month}-01`;
+            const endDate = new Date(parseInt(month.split('-')[0]), parseInt(month.split('-')[1]), 0).toISOString().split('T')[0];
+            
+            try {
+                const params = new URLSearchParams({ property_slug: property, start_date: startDate, end_date: endDate, report_type: 'monthly' });
+                const response = await fetch(`/.netlify/functions/get-analytics?${params}`);
+                const data = await response.json();
+                
+                if (!data.success) throw new Error(data.error || 'Failed to load data');
+                
+                if (!data.monthly || data.monthly.length === 0) {
+                    report.innerHTML = `<div class="empty-state"><h2>📊 No Data for This Period</h2><p>No activity was recorded for the selected month.</p></div>`;
+                    return;
+                }
+                
+                renderReport(data.monthly, month);
+                populatePropertyFilter(data.monthly.reduce((acc, p) => { acc[p.property_slug] = 1; return acc; }, {}), 'propertyFilterReport');
+            } catch (e) {
+                console.error('Report error:', e);
+                report.innerHTML = `<div class="empty-state"><h2>⚠️ Error Loading Report</h2><p>${e.message}</p></div>`;
+            }
+        }
+        
+        function renderReport(monthlyData, selectedMonth) {
+            const report = document.getElementById('report');
+            
+            const totals = monthlyData.reduce((acc, p) => {
+                acc.timeSaved += parseFloat(p.time_saved_hours) || 0;
+                acc.questions += p.questions_answered || 0;
+                acc.voiceCalls += p.voice_calls || 0;
+                acc.cardClicks += p.card_clicks || 0;
+                return acc;
+            }, { timeSaved: 0, questions: 0, voiceCalls: 0, cardClicks: 0 });
+            
+            const monthDate = new Date(selectedMonth + '-01');
+            const monthLabel = monthDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            const totalValue = (totals.voiceCalls + totals.cardClicks) * 15;
+            
+            let html = `
+                <div class="summary-banner">
+                    <div class="summary-headline">${totals.timeSaved.toFixed(1)} Hours Saved</div>
+                    <div class="summary-subtext">
+                        ${totals.questions} questions answered across ${monthlyData.length} ${monthlyData.length === 1 ? 'property' : 'properties'} in ${monthLabel}
+                        <br><strong>Estimated Value: $${totalValue.toLocaleString()}</strong>
+                    </div>
+                </div>
+            `;
+            
+            monthlyData.forEach(p => {
+                const valueCreated = ((p.voice_calls || 0) + (p.card_clicks || 0)) * 15;
+                const hoursSaved = p.time_saved_hours || 0;
+                
+                html += `
+                    <div class="property-report">
+                        <div class="property-header">
+                            <span class="property-name">🏠 ${p.property_slug}</span>
+                            <span class="property-month">${monthLabel}</span>
+                        </div>
+                        
+                        <div class="stats-grid-report">
+                            <div class="stat-box highlight-stat">
+                                <div class="stat-value">${hoursSaved}</div>
+                                <div class="stat-label">Hours Saved ${tooltip('hours_saved')}</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value">${p.questions_answered || 0}</div>
+                                <div class="stat-label">Questions ${tooltip('questions_answered')}</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value">${p.voice_calls || 0}</div>
+                                <div class="stat-label">Voice Calls ${tooltip('voice_calls')}</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value">${p.unique_sessions || 0}</div>
+                                <div class="stat-label">Sessions ${tooltip('unique_sessions')}</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value">${p.app_opens || 0}</div>
+                                <div class="stat-label">App Opens ${tooltip('app_opens')}</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value">${p.card_clicks || 0}</div>
+                                <div class="stat-label">Recommendations ${tooltip('card_clicks')}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="value-statement">
+                            <strong>${hoursSaved} hours and $${valueCreated.toLocaleString()} saved</strong>
+                            <small>Based on 5 min per interaction and $15 per inquiry deflected ${tooltip('value_created')}</small>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            report.innerHTML = html;
+        }
+        
+        async function loadCategoryReport() {
+            const container = document.getElementById('categoryReport');
+            container.innerHTML = `<div class="loading"><div class="spinner"></div><p>Loading business report...</p></div>`;
+            
+            const category = document.getElementById('categorySelect').value;
+            const startDate = document.getElementById('catStartDate').value;
+            const endDate = document.getElementById('catEndDate').value;
+            
+            try {
+                const params = new URLSearchParams({ property_slug: 'all', start_date: startDate, end_date: endDate, report_type: 'category' });
+                const response = await fetch(`/.netlify/functions/get-analytics?${params}`);
+                const data = await response.json();
+                
+                if (!data.success) throw new Error(data.error || 'Failed to load data');
+                
+                currentCategoryData = data.categories;
+                renderCategoryReport(data.categories, category);
+            } catch (e) {
+                console.error('Category report error:', e);
+                container.innerHTML = `<div class="empty-state"><h2>⚠️ Error Loading Report</h2><p>${e.message}</p></div>`;
+            }
+        }
+        
+        function renderCategoryReport(categories, selectedCategory) {
+            const container = document.getElementById('categoryReport');
+            
+            if (!categories || Object.keys(categories).length === 0) {
+                container.innerHTML = `<div class="empty-state"><h2>📊 No Data Yet</h2><p>Business impression and click data will appear here once guests start using Lucy.</p><p style="margin-top:1rem; font-size:0.85rem;">Note: Impression tracking requires the latest version of the Lucy app.</p></div>`;
+                return;
+            }
+            
+            const categoryIcons = { dining: '🍽️', beaches: '🏖️', grocery: '🛒', pets: '🐕', rentals: '🎯', activities: '🎭' };
+            
+            let html = '';
+            const categoriesToShow = selectedCategory === 'all' ? Object.keys(categories) : [selectedCategory];
+            
+            for (const cat of categoriesToShow) {
+                const catData = categories[cat];
+                if (!catData) continue;
+                
+                const icon = categoryIcons[cat] || '📋';
+                
+                html += `
+                    <div class="section">
+                        <h2>${icon} ${cat.charAt(0).toUpperCase() + cat.slice(1)}</h2>
+                        
+                        <div class="category-summary">
+                            <div class="category-summary-item">
+                                <div class="category-summary-value">${catData.total_impressions.toLocaleString()}</div>
+                                <div class="category-summary-label">Total Impressions ${tooltip('impressions')}</div>
+                            </div>
+                            <div class="category-summary-item">
+                                <div class="category-summary-value">${catData.total_clicks.toLocaleString()}</div>
+                                <div class="category-summary-label">Total Clicks ${tooltip('clicks')}</div>
+                            </div>
+                            <div class="category-summary-item">
+                                <div class="category-summary-value">${catData.ctr}%</div>
+                                <div class="category-summary-label">Avg CTR ${tooltip('ctr')}</div>
+                            </div>
+                        </div>
+                        
+                        <table class="category-table">
+                            <thead>
+                                <tr>
+                                    <th>Business</th>
+                                    <th>Impressions</th>
+                                    <th>Clicks</th>
+                                    <th>CTR</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${catData.businesses.map(b => {
+                                    const ctrClass = b.ctr >= 15 ? 'ctr-good' : b.ctr >= 5 ? 'ctr-ok' : 'ctr-low';
+                                    return `<tr>
+                                        <td>${b.name}</td>
+                                        <td>${b.impressions.toLocaleString()}</td>
+                                        <td>${b.clicks.toLocaleString()}</td>
+                                        <td class="${ctrClass}">${b.ctr}%</td>
+                                    </tr>`;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+            
+            if (!html) {
+                html = `<div class="empty-state"><h2>📊 No Data for ${selectedCategory}</h2><p>No activity recorded for this category.</p></div>`;
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        function populatePropertyFilter(byProperty, selectId) {
+            const select = document.getElementById(selectId);
+            const currentValue = select.value;
+            const properties = Object.keys(byProperty || {}).filter(p => p !== 'unknown');
+            select.innerHTML = '<option value="all">All Properties</option>' +
+                properties.map(p => `<option value="${p}" ${p === currentValue ? 'selected' : ''}>${p}</option>`).join('');
+        }
+        
+        function exportCSV() {
+            if (!currentData || !currentData.summary) { alert('No data to export.'); return; }
+            const stats = currentData.summary;
+            const property = document.getElementById('propertyFilter').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            let csv = 'Lucy Analytics Report\n';
+            csv += `Property,${property === 'all' ? 'All Properties' : property}\n`;
+            csv += `Date Range,${startDate} to ${endDate}\n\n`;
+            csv += 'Key Metrics\n';
+            csv += `Hours Saved,${stats.time_saved_hours}\n`;
+            csv += `Questions Answered,${stats.questions_answered}\n`;
+            csv += `Voice Calls,${stats.voice_calls}\n`;
+            csv += `Unique Sessions,${stats.unique_sessions}\n`;
+            csv += `App Opens,${stats.app_opens}\n`;
+            csv += `Recommendations Clicked,${stats.card_clicks}\n\n`;
+            csv += 'Top Recommendations\nName,Clicks\n';
+            (stats.top_recommendations || []).forEach(([name, count]) => { csv += `"${name}",${count}\n`; });
+            
+            downloadCSV(csv, `lucy-analytics-${property}-${startDate}-to-${endDate}.csv`);
+        }
+        
+        function exportCategoryCSV() {
+            if (!currentCategoryData) { alert('No data to export.'); return; }
+            const category = document.getElementById('categorySelect').value;
+            const startDate = document.getElementById('catStartDate').value;
+            const endDate = document.getElementById('catEndDate').value;
+            
+            let csv = 'Lucy Business Report\n';
+            csv += `Date Range,${startDate} to ${endDate}\n\n`;
+            csv += 'Category,Business,Impressions,Clicks,CTR\n';
+            
+            const categoriesToExport = category === 'all' ? Object.keys(currentCategoryData) : [category];
+            for (const cat of categoriesToExport) {
+                const catData = currentCategoryData[cat];
+                if (!catData) continue;
+                catData.businesses.forEach(b => {
+                    csv += `"${cat}","${b.name}",${b.impressions},${b.clicks},${b.ctr}%\n`;
+                });
+            }
+            
+            downloadCSV(csv, `lucy-business-report-${category}-${startDate}-to-${endDate}.csv`);
+        }
+        
+        function downloadCSV(csv, filename) {
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+        
+        // Initialize
+        if (urlView === 'report') document.querySelector('.view-btn:nth-child(2)').click();
+        else if (urlView === 'category') document.querySelector('.view-btn:nth-child(3)').click();
+        else loadDashboard();
+    </script>
+</body>
+</html>

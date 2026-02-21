@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucy Analytics Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #1e3a5f;
+            --navy-dark: #152a45;
+            --navy-light: #2d4a6f;
+            --coral: #e07a5f;
+            --coral-dark: #c96a52;
+            --coral-light: #e89680;
+            --white: #FFFFFF;
+            --gray-light: #94A3B8;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(160deg, var(--navy) 0%, var(--navy-dark) 100%);
+            min-height: 100vh;
+            color: var(--white);
+            padding: 1.5rem;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        /* ===== HEADER ===== */
+        header {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 1.5rem 0 2rem;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            margin-bottom: 1.5rem;
+        }
+        .header-logo { width: 90px; height: auto; flex-shrink: 0; }
+        .header-text h1 { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.02em; }
+        .header-text .subtitle { color: var(--gray-light); font-size: 0.95rem; margin-top: 0.25rem; }
+
+        /* ===== FILTERS ===== */
+        .filters {
+            display: flex; gap: 1rem; flex-wrap: wrap;
+            margin-bottom: 1.5rem; align-items: flex-end;
+        }
+        .filter-group { display: flex; flex-direction: column; gap: 0.25rem; }
+        .filter-group label {
+            font-size: 0.7rem; color: var(--gray-light);
+            text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;
+        }
+        select, input[type="date"] {
+            padding: 0.65rem 0.9rem; border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.15);
+            background: var(--navy-light); color: var(--white);
+            font-size: 0.85rem; font-family: inherit; min-width: 140px;
+        }
+        select::-webkit-calendar-picker-indicator,
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); }
+        .btn {
+            padding: 0.65rem 1.25rem; border-radius: 8px; border: none;
+            background: var(--coral); color: var(--white);
+            font-weight: 600; font-family: inherit; font-size: 0.85rem;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .btn:hover {
+            background: var(--coral-dark); transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(224, 122, 95, 0.4);
+        }
+        .btn-secondary { background: var(--navy-light); border: 1px solid rgba(255,255,255,0.15); }
+        .btn-secondary:hover { background: var(--navy); box-shadow: none; }
+        .export-btn { margin-left: auto; }
+
+        /* ===== HIGHLIGHT METRICS (top row) ===== */
+        .highlight-row {
+            display: flex; justify-content: center;
+            gap: 1.25rem; margin-bottom: 1rem;
+        }
+        .highlight-card {
+            background: linear-gradient(135deg, var(--coral) 0%, var(--coral-dark) 100%);
+            border-radius: 14px; padding: 1.25rem 2.5rem;
+            text-align: center; min-width: 180px;
+        }
+        .highlight-card .metric-value { font-size: 2.5rem; font-weight: 700; color: var(--white); }
+        .highlight-card .metric-label { font-size: 0.85rem; color: rgba(255,255,255,0.9); font-weight: 500; }
+
+        /* ===== STANDARD METRICS (second row) ===== */
+        .metrics-row {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 1rem; margin-bottom: 1.5rem;
+        }
+        .metric-card {
+            background: var(--navy-light); border-radius: 12px;
+            padding: 1.25rem; text-align: center;
+        }
+        .metric-card .metric-value { font-size: 2.2rem; font-weight: 700; color: var(--coral); }
+        .metric-card .metric-label { font-size: 0.8rem; color: var(--gray-light); font-weight: 500; margin-top: 0.15rem; }
+
+        /* ===== SECTION PANELS ===== */
+        .section {
+            background: var(--navy-light); border-radius: 12px;
+            padding: 1.25rem 1.5rem; margin-bottom: 1.25rem;
+        }
+        .section h2 {
+            font-size: 1rem; font-weight: 700; margin-bottom: 0.75rem;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+
+        /* ===== ACTIVITY CHART ===== */
+        .chart-container {
+            height: 180px; display: flex; align-items: flex-end;
+            gap: 3px; padding: 0.5rem 0 1.5rem;
+        }
+        .bar {
+            flex: 1; background: var(--coral); border-radius: 3px 3px 0 0;
+            min-height: 3px; position: relative; transition: all 0.3s;
+        }
+        .bar:hover { background: var(--coral-light); }
+        .bar-label {
+            position: absolute; bottom: -18px; left: 50%;
+            transform: translateX(-50%); font-size: 0.6rem;
+            color: var(--gray-light); white-space: nowrap;
+        }
+        .bar-value {
+            position: absolute; top: -18px; left: 50%;
+            transform: translateX(-50%); font-size: 0.65rem;
+            color: var(--white); opacity: 0; transition: opacity 0.2s; font-weight: 600;
+        }
+        .bar:hover .bar-value { opacity: 1; }
+
+        /* ===== FOUR COLUMN BOTTOM ===== */
+        .three-col {
+            display: grid; grid-template-columns: 260px 1fr 1fr 1fr; gap: 1.25rem;
+        }
+        .section h3 {
+            font-size: 0.95rem; font-weight: 700; margin-bottom: 0.75rem;
+            text-align: center;
+        }
+        .section h3.sub-header { margin-top: 1.5rem; }
+
+        /* ===== SIDEBAR COMPACT TABLE ===== */
+        .compact-table { width: 100%; border-collapse: collapse; }
+        .compact-table td {
+            padding: 0.45rem 0.25rem; font-size: 0.85rem;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .compact-table td:last-child {
+            text-align: right; color: var(--coral); font-weight: 600; white-space: nowrap;
+        }
+        .compact-table tr:last-child td { border-bottom: none; }
+
+        /* ===== DATA TABLE ===== */
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table thead th {
+            text-align: left; font-size: 0.75rem; font-weight: 700;
+            color: var(--gray-light); text-transform: uppercase;
+            letter-spacing: 0.04em; padding: 0.6rem 0.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .data-table thead th:last-child { text-align: right; }
+        .data-table tbody td {
+            padding: 0.5rem; font-size: 0.85rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .data-table tbody td:last-child { text-align: right; color: var(--coral); font-weight: 600; }
+        .data-table tbody tr:last-child td { border-bottom: none; }
+
+        /* ===== LOADING / EMPTY ===== */
+        .loading { text-align: center; padding: 4rem; }
+        .spinner {
+            width: 44px; height: 44px;
+            border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--coral);
+            border-radius: 50%; animation: spin 0.8s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .empty-state { text-align: center; padding: 4rem; color: var(--gray-light); }
+        .empty-state h2 { margin-bottom: 0.5rem; color: var(--white); }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1100px) {
+            .three-col { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 900px) {
+            .three-col { grid-template-columns: 1fr; }
+            .metrics-row { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 600px) {
+            .filters { flex-direction: column; align-items: stretch; }
+            .filter-group { width: 100%; }
+            select, input[type="date"] { width: 100%; }
+            .btn { width: 100%; }
+            .export-btn { margin-left: 0; }
+            .highlight-row { flex-direction: column; align-items: stretch; }
+            .highlight-card { min-width: auto; }
+            .metrics-row { grid-template-columns: repeat(2, 1fr); }
+            header { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <img id="headerLogo" src="" alt="Lucy" class="header-logo" style="display: none;">
+            <div class="header-text">
+                <h1>Lucy Analytics Dashboard</h1>
+                <p class="subtitle">Track guest interactions and measure value</p>
+            </div>
+        </header>
+
+        <div class="filters">
+            <div class="filter-group">
+                <label>Property</label>
+                <select id="propertyFilter"><option value="all">All Properties</option></select>
+            </div>
+            <div class="filter-group">
+                <label>Start Date</label>
+                <input type="date" id="startDate">
+            </div>
+            <div class="filter-group">
+                <label>End Date</label>
+                <input type="date" id="endDate">
+            </div>
+            <button class="btn" onclick="loadDashboard()">Apply Filters</button>
+            <button class="btn btn-secondary export-btn" onclick="exportReport()">📥 Export CSV</button>
+        </div>
+
+        <div id="dashboard">
+            <div class="loading"><div class="spinner"></div><p>Loading analytics...</p></div>
+        </div>
+    </div>
+
+    <script>
+        // ===== UTILITIES =====
+        function formatLocalDate(d) {
+            return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+        }
+
+        // ===== INIT =====
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlProperty = urlParams.get('property');
+        const today = new Date();
+        const thirtyDaysAgo = new Date(today.getTime() - 30*24*60*60*1000);
+        document.getElementById('endDate').value = formatLocalDate(today);
+        document.getElementById('startDate').value = formatLocalDate(thirtyDaysAgo);
+
+        if (urlProperty && urlProperty !== 'all') {
+            const sel = document.getElementById('propertyFilter');
+            const opt = document.createElement('option');
+            opt.value = urlProperty; opt.textContent = urlProperty; opt.selected = true;
+            sel.appendChild(opt);
+        }
+
+        let currentData = null;
+        let currentVoiceRecs = [];
+        let dashboardSectionTitle = 'Top Picks';
+
+        // ===== PROPERTY GROUP DATA =====
+        async function fetchPropertyGroupData(slug) {
+            const result = { sectionTitle: 'Top Picks', logo: null };
+            const fetchSlug = (!slug || slug === 'all') ? 'hookweimsinker' : slug;
+            try {
+                const r = await fetch('/.netlify/functions/get-property?slug=' + fetchSlug);
+                const d = await r.json();
+                if (d.pmGroup) {
+                    if (d.pmGroup.dashboard_section_title) result.sectionTitle = d.pmGroup.dashboard_section_title;
+                    if (d.pmGroup.logo) {
+                        const lf = d.pmGroup.logo;
+                        result.logo = Array.isArray(lf) ? lf[0]?.url : lf;
+                    }
+                }
+            } catch(e) {}
+            return result;
+        }
+
+        function updateHeaderLogo(url) {
+            const el = document.getElementById('headerLogo');
+            if (url) { el.src = url; el.style.display = 'block'; }
+            else { el.style.display = 'none'; }
+        }
+
+        // ===== LOAD DASHBOARD =====
+        async function loadDashboard() {
+            const dashboard = document.getElementById('dashboard');
+            dashboard.innerHTML = '<div class="loading"><div class="spinner"></div><p>Loading analytics...</p></div>';
+
+            const property = document.getElementById('propertyFilter').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            try {
+                const groupData = await fetchPropertyGroupData(property);
+                dashboardSectionTitle = groupData.sectionTitle;
+                updateHeaderLogo(groupData.logo);
+
+                const params = new URLSearchParams({
+                    property_slug: property,
+                    start_date: startDate,
+                    end_date: endDate,
+                    report_type: 'summary'
+                });
+                const response = await fetch('/.netlify/functions/get-analytics?' + params);
+                const data = await response.json();
+                if (!data.success) throw new Error(data.error || 'Failed to load data');
+                currentData = data;
+
+                if (data.record_count === 0) {
+                    dashboard.innerHTML = '<div class="empty-state"><h2>📊 No Data Yet</h2><p>Analytics will appear here once guests start using Lucy.</p></div>';
+                    return;
+                }
+
+                renderDashboard(data.summary);
+                populatePropertyFilter(data.summary.by_property);
+
+                // Fetch real Vapi stats
+                let voiceRecsHtml = '';
+                try {
+                    const vp = new URLSearchParams({ start_date: startDate, end_date: endDate });
+                    const vr = await fetch('/.netlify/functions/get-vapi-stats?' + vp);
+                    const vd = await vr.json();
+                    if (vd.success && vd.stats) updateVapiMetrics(vd.stats);
+                    if (vd.success && vd.voice_recommendations && vd.voice_recommendations.length > 0) {
+                        currentVoiceRecs = vd.voice_recommendations;
+                        voiceRecsHtml = vd.voice_recommendations.slice(0, 10)
+                            .map(r => '<tr><td>' + r.name + '</td><td>' + r.count + '</td></tr>')
+                            .join('');
+                    }
+                } catch(e) { console.log('Vapi stats not available:', e); }
+
+                // Render voice recommendations column
+                const voiceCol = document.getElementById('voice-recs-body');
+                if (voiceCol) {
+                    voiceCol.innerHTML = voiceRecsHtml || '<tr><td colspan="2" style="color:var(--gray-light)">No voice data yet</td></tr>';
+                }
+
+            } catch(e) {
+                console.error('Dashboard error:', e);
+                dashboard.innerHTML = '<div class="empty-state"><h2>⚠️ Error Loading Data</h2><p>' + e.message + '</p></div>';
+            }
+        }
+
+        // ===== VAPI OVERRIDE =====
+        function updateVapiMetrics(vs) {
+            const qEl = document.getElementById('metric-questions');
+            const vcEl = document.getElementById('metric-voicecalls');
+            const hsEl = document.getElementById('metric-hourssaved');
+            const msEl = document.getElementById('metric-moneysaved');
+            if (qEl) qEl.textContent = vs.total_questions;
+            if (vcEl) vcEl.textContent = vs.total_calls;
+            const cc = parseInt(document.getElementById('metric-cardclicks')?.textContent || '0');
+            const total = vs.total_questions + cc;
+            const hours = (total * 5 / 60).toFixed(1);
+            const money = Math.round(total * 10);
+            if (hsEl) hsEl.textContent = hours;
+            if (msEl) msEl.textContent = '$' + money;
+        }
+
+        // ===== RENDER =====
+        function renderDashboard(stats) {
+            const dashboard = document.getElementById('dashboard');
+
+            // --- Timezone conversion for peak hours ---
+            const tz = 'America/Chicago';
+            const now = new Date();
+            const localHourStr = now.toLocaleString('en-US', { timeZone: tz, hour: 'numeric', hour12: false });
+            const tzOffset = now.getUTCHours() - parseInt(localHourStr);
+            const localPeakHours = {};
+            for (const [uh, c] of Object.entries(stats.peak_hours || {})) {
+                let lh = (parseInt(uh) - tzOffset + 24) % 24;
+                localPeakHours[lh] = (localPeakHours[lh] || 0) + c;
+            }
+            const hours = Array.from({length: 24}, (_, i) => i);
+            const maxH = Math.max(...Object.values(localPeakHours), 1);
+            const chartBars = hours.map(h => {
+                const v = localPeakHours[h] || 0;
+                const pct = (v / maxH) * 100;
+                const lbl = h === 0 ? '12a' : h < 12 ? h + 'a' : h === 12 ? '12p' : (h - 12) + 'p';
+                return '<div class="bar" style="height:' + Math.max(pct, 2) + '%"><span class="bar-value">' + v + '</span><span class="bar-label">' + lbl + '</span></div>';
+            }).join('');
+
+            // --- Money saved ---
+            const moneySaved = Math.round((stats.questions_answered || 0) * 10);
+
+            // --- Today at the Beach (from beach_clicks) ---
+            const beachClicks = stats.beach_clicks || {};
+            let beachRows = Object.entries(beachClicks)
+                .sort((a, b) => b[1] - a[1])
+                .map(([name, count]) => '<tr><td>' + name + '</td><td>' + count + ' Click' + (count !== 1 ? 's' : '') + '</td></tr>')
+                .join('');
+            if (!beachRows) beachRows = '<tr><td colspan="2" style="color:var(--gray-light);font-size:0.8rem">No beach activity yet</td></tr>';
+
+            // --- Quick Access Info (from quick_access_breakdown) ---
+            const qaBreakdown = stats.quick_access_breakdown || {};
+            let qaRows = Object.entries(qaBreakdown)
+                .sort((a, b) => b[1] - a[1])
+                .map(([name, count]) => '<tr><td>' + name + '</td><td>' + count + ' Click' + (count !== 1 ? 's' : '') + '</td></tr>')
+                .join('');
+            if (!qaRows) qaRows = '<tr><td colspan="2" style="color:var(--gray-light);font-size:0.8rem">No quick access activity yet</td></tr>';
+
+            // --- Top Places Searched (impressions from by_business) ---
+            const biz = stats.by_business || [];
+            let impRows = biz
+                .filter(b => b.impressions > 0)
+                .sort((a, b) => b.impressions - a.impressions)
+                .slice(0, 10)
+                .map(b => '<tr><td>' + b.name + '</td><td>' + b.impressions + '</td></tr>')
+                .join('');
+            if (!impRows) impRows = '<tr><td colspan="2" style="color:var(--gray-light)">No data yet</td></tr>';
+
+            // --- Top Places Clicked (clicks from by_business, fallback to top_recommendations) ---
+            let clkRows = biz
+                .filter(b => b.clicks > 0)
+                .sort((a, b) => b.clicks - a.clicks)
+                .slice(0, 10)
+                .map(b => '<tr><td>' + b.name + '</td><td>' + b.clicks + '</td></tr>')
+                .join('');
+            if (!clkRows) {
+                clkRows = (stats.top_recommendations || []).slice(0, 10)
+                    .map(([n, c]) => '<tr><td>' + n + '</td><td>' + c + '</td></tr>')
+                    .join('');
+            }
+            if (!clkRows) clkRows = '<tr><td colspan="2" style="color:var(--gray-light)">No data yet</td></tr>';
+
+            // --- RENDER ALL ---
+            dashboard.innerHTML = ''
+                // Highlight row
+                + '<div class="highlight-row">'
+                +   '<div class="highlight-card">'
+                +     '<div class="metric-value" id="metric-hourssaved">' + (stats.time_saved_hours || 0) + '</div>'
+                +     '<div class="metric-label">Hours Saved</div>'
+                +   '</div>'
+                +   '<div class="highlight-card">'
+                +     '<div class="metric-value" id="metric-moneysaved">$' + moneySaved + '</div>'
+                +     '<div class="metric-label">Money Saved</div>'
+                +   '</div>'
+                + '</div>'
+
+                // Metrics row
+                + '<div class="metrics-row">'
+                +   '<div class="metric-card"><div class="metric-value">' + (stats.app_opens || 0) + '</div><div class="metric-label">App Opens</div></div>'
+                +   '<div class="metric-card"><div class="metric-value" id="metric-voicecalls">' + (stats.voice_calls || 0) + '</div><div class="metric-label">Voice Calls</div></div>'
+                +   '<div class="metric-card"><div class="metric-value" id="metric-questions">' + (stats.questions_answered || 0) + '</div><div class="metric-label">Questions Answered</div></div>'
+                +   '<div class="metric-card"><div class="metric-value" id="metric-cardclicks">' + (stats.card_clicks || 0) + '</div><div class="metric-label">Dashboard Clicks</div></div>'
+                + '</div>'
+
+                // Activity by hour
+                + '<div class="section">'
+                +   '<h2>📈 Activity by Hour</h2>'
+                +   '<div class="chart-container">' + chartBars + '</div>'
+                + '</div>'
+
+                // Three column bottom
+                + '<div class="three-col">'
+
+                // LEFT: Beach + Quick Access sidebar
+                +   '<div class="section">'
+                +     '<h3>Today at the Beach</h3>'
+                +     '<table class="compact-table">' + beachRows + '</table>'
+                +     '<h3 class="sub-header">Quick Access Info</h3>'
+                +     '<table class="compact-table">' + qaRows + '</table>'
+                +   '</div>'
+
+                // MIDDLE: Top Places Viewed
+                +   '<div class="section">'
+                +     '<h3>Top Places Viewed</h3>'
+                +     '<table class="data-table"><thead><tr><th>Places</th><th>Impressions</th></tr></thead>'
+                +     '<tbody>' + impRows + '</tbody></table>'
+                +   '</div>'
+
+                // RIGHT: Top Places Clicked
+                +   '<div class="section">'
+                +     '<h3>Top Places Clicked</h3>'
+                +     '<table class="data-table"><thead><tr><th>Places</th><th>Clicks</th></tr></thead>'
+                +     '<tbody>' + clkRows + '</tbody></table>'
+                +   '</div>'
+
+                // FAR RIGHT: Top Places Recommended (Voice)
+                +   '<div class="section">'
+                +     '<h3>Top Places Recommended (Voice)</h3>'
+                +     '<table class="data-table"><thead><tr><th>Places</th><th>Mentions</th></tr></thead>'
+                +     '<tbody id="voice-recs-body"><tr><td colspan="2" style="color:var(--gray-light)">Loading...</td></tr></tbody></table>'
+                +   '</div>'
+
+                + '</div>';
+        }
+
+        // ===== PROPERTY FILTER =====
+        function populatePropertyFilter(byProperty) {
+            const select = document.getElementById('propertyFilter');
+            const currentVal = select.value;
+            const props = Object.keys(byProperty || {}).filter(p => p !== 'unknown' && p !== 'dashboard');
+            select.innerHTML = '<option value="all">All Properties</option>'
+                + props.map(p => '<option value="' + p + '"' + (p === currentVal ? ' selected' : '') + '>' + p + '</option>').join('');
+        }
+
+        // ===== EXPORT =====
+        function exportReport() {
+            if (!currentData || !currentData.summary) { alert('No data to export. Apply filters first.'); return; }
+            const s = currentData.summary;
+            const prop = document.getElementById('propertyFilter').value;
+            const sd = document.getElementById('startDate').value;
+            const ed = document.getElementById('endDate').value;
+            const ms = Math.round((s.questions_answered || 0) * 10);
+
+            let csv = 'Lucy Analytics Report\n';
+            csv += 'Property,' + (prop === 'all' ? 'All Properties' : prop) + '\n';
+            csv += 'Date Range,' + sd + ' to ' + ed + '\n\n';
+            csv += 'Key Metrics\n';
+            csv += 'Hours Saved,' + s.time_saved_hours + '\n';
+            csv += 'Money Saved,$' + ms + '\n';
+            csv += 'App Opens,' + s.app_opens + '\n';
+            csv += 'Voice Calls,' + s.voice_calls + '\n';
+            csv += 'Questions Answered,' + s.questions_answered + '\n';
+            csv += 'Dashboard Clicks,' + s.card_clicks + '\n\n';
+
+            csv += 'Today at the Beach\n';
+            csv += 'Item,Clicks\n';
+            Object.entries(s.beach_clicks || {}).forEach(([n, c]) => { csv += '"' + n + '",' + c + '\n'; });
+            csv += '\n';
+
+            csv += 'Quick Access Info\n';
+            csv += 'Item,Clicks\n';
+            Object.entries(s.quick_access_breakdown || {}).forEach(([n, c]) => { csv += '"' + n + '",' + c + '\n'; });
+            csv += '\n';
+
+            csv += 'Top Places Viewed\nName,Impressions\n';
+            (s.by_business || []).filter(b => b.impressions > 0).sort((a, b) => b.impressions - a.impressions)
+                .forEach(b => { csv += '"' + b.name + '",' + b.impressions + '\n'; });
+            csv += '\n';
+
+            csv += 'Top Places Clicked\nName,Clicks\n';
+            (s.top_recommendations || []).forEach(([n, c]) => { csv += '"' + n + '",' + c + '\n'; });
+            csv += '\n';
+
+            csv += 'Top Places Recommended (Voice)\nName,Mentions\n';
+            currentVoiceRecs.forEach(r => { csv += '"' + r.name + '",' + r.count + '\n'; });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'lucy-analytics-' + prop + '-' + sd + '-to-' + ed + '.csv';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        // ===== GO =====
+        loadDashboard();
+    </script>
+</body>
+</html>
